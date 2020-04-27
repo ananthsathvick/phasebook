@@ -167,46 +167,6 @@
                     console.log('permiss', permission)
                 });
             // });
-            function notifyMe_f(fname) {
-                // console.log("1");
-                if (!Notification) {
-                    alert('Desktop notifications not available in your browser. Try Chromium.');
-                    //  console.log("2");
-                    return;
-                }
-
-                if (Notification.permission !== "granted") {
-                    Notification.requestPermission().then(function(permission) {
-                        // If the user accepts, let's create a notification
-                        if (permission === "granted") {
-                            var notification = new Notification('New friend Request From ' + fname, {
-                                icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
-                                body: "Accept them nibba",
-                            });
-
-                            notification.onclick = function() {
-                                //            console.log("5");
-                                window.open("http://88a17fb8.ngrok.io/messenger");
-                            };
-                        }
-                    });
-                    //  console.log("3");
-                } else {
-                    //  console.log("4");
-                    var notification = new Notification('New friend Request From ' + fname, {
-                        icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
-                        body: "Accept them nibba",
-                    });
-
-                    notification.onclick = function() {
-                        //        console.log("5");
-                        window.open("http://88a17fb8.ngrok.io/messenger");
-                    };
-                    //   console.log("6");
-                }
-                //  console.log("7");
-
-            }
 
             function notifyMe(fname, message) {
                 // console.log("1");
