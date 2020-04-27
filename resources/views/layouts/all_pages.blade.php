@@ -95,7 +95,13 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" href="#"><i class="fas fa-user-friends"></i></a>
+                            <div class="dropdown">
+                                <a class="nav-link btn dropdown-toggle" id="get_frq" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#"><i class="fas fa-user-friends"></i><sup class="border-0 rounded-circle bg-danger" style="padding: 0px 2px;" id="pend_freq"></sup></a>
+                                <div class="dropdown-menu" aria-labelledby="get_frq" id="friend">
+
+                                </div>
+
+                            </div>
                         </li>
 
                         <li class="nav-item">
@@ -140,6 +146,20 @@
         var receiver_id = '';
         var my_id = "{{ Auth::id() }}";
         $(document).ready(function() {
+            $.ajax({
+                type: "post",
+                url: "/get_frq_pen", // need to create this route
+                data: {
+                    id: "{{Auth::id()}}"
+                },
+                success: function(data) {
+                    $('#pend_freq').html(data);
+                    if (data == 0) {
+                        $('#pend_freq').hide();
+                    }
+                }
+            });
+
             // request permission on page load
             // document.addEventListener('DOMContentLoaded', function() {
             if (Notification.permission !== "granted")
@@ -147,6 +167,46 @@
                     console.log('permiss', permission)
                 });
             // });
+            function notifyMe_f(fname) {
+                // console.log("1");
+                if (!Notification) {
+                    alert('Desktop notifications not available in your browser. Try Chromium.');
+                    //  console.log("2");
+                    return;
+                }
+
+                if (Notification.permission !== "granted") {
+                    Notification.requestPermission().then(function(permission) {
+                        // If the user accepts, let's create a notification
+                        if (permission === "granted") {
+                            var notification = new Notification('New friend Request From ' + fname, {
+                                icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
+                                body: "Accept them nibba",
+                            });
+
+                            notification.onclick = function() {
+                                //            console.log("5");
+                                window.open("http://88a17fb8.ngrok.io/messenger");
+                            };
+                        }
+                    });
+                    //  console.log("3");
+                } else {
+                    //  console.log("4");
+                    var notification = new Notification('New friend Request From ' + fname, {
+                        icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
+                        body: "Accept them nibba",
+                    });
+
+                    notification.onclick = function() {
+                        //        console.log("5");
+                        window.open("http://88a17fb8.ngrok.io/messenger");
+                    };
+                    //   console.log("6");
+                }
+                //  console.log("7");
+
+            }
 
             function notifyMe(fname, message) {
                 // console.log("1");
@@ -219,7 +279,7 @@
                         // if receiver is selected, reload the selected user ...
                         $('#' + data.from).click();
                     } else {
-                        
+
                         // if receiver is not seleted, add notification for that user
                         var pending = parseInt($('#' + data.from).find('.pending').html());
 
@@ -241,7 +301,7 @@
                 receiver_id = $(this).attr('id');
                 $.ajax({
                     type: "get",
-                    url: "message/" + receiver_id, // need to create this route
+                    url: "message/" + receiver_id, // need to create this route .. created
                     data: "",
                     cache: false,
                     success: function(data) {
@@ -286,6 +346,81 @@
                 scrollTop: $('.message-wrapper').get(0).scrollHeight
             }, 50);
         }
+        $('#get_frq').click(function() {
+            $.ajax({
+                type: "post",
+                url: "/get_frq", // need to create this route
+                data: {
+                    id: "{{Auth::id()}}"
+                },
+                success: function(data) {
+                    $('#friend').html(data);
+                    $('#pend_freq').hide();
+                }
+            });
+        });
+
+        Pusher.logToConsole = false;
+
+        var pusher_f = new Pusher('a8ceda3b313fecc81569', {
+            cluster: 'ap2',
+            forceTLS: true
+        });
+
+        var channel_f = pusher_f.subscribe('friend_req');
+        channel_f.bind('req_sent', function(data) {
+            // alert(JSON.stringify(data));
+
+            if (my_id == data.to) {
+                if (!Notification) {
+                    alert('Desktop notifications not available in your browser. Try Chromium.');
+                    //  console.log("2");
+                    return;
+                }
+
+                if (Notification.permission !== "granted") {
+                    Notification.requestPermission().then(function(permission) {
+                        // If the user accepts, let's create a notification
+                        if (permission === "granted") {
+                            var notification = new Notification('New friend Request From ' + data.from, {
+                                icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
+                                body: "Accept them nibba",
+                            });
+
+                            notification.onclick = function() {
+                                //            console.log("5");
+                                window.open("http://88a17fb8.ngrok.io/messenger");
+                            };
+                        }
+                    });
+                    //  console.log("3");
+                } else {
+                    //  console.log("4");
+                    var notification = new Notification('New friend Request From ' + data.from, {
+                        icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
+                        body: "Accept them nibba",
+                    });
+
+                    notification.onclick = function() {
+                        //        console.log("5");
+                        window.open("http://88a17fb8.ngrok.io/messenger");
+                    };
+                    //   console.log("6");
+                }
+                if ($('#friend').hasClass('show')) {
+                    // if receiver is selected, reload the selected user ...
+                    $('#get_frq').click();
+                    $('#get_frq').click();
+                } else {
+
+                    // if receiver is not seleted, add notification for that user
+                    var pending = parseInt($('#pend_freq').html());
+                    $('#pend_freq').show();
+                    $('#pend_freq').html(pending + 1);
+
+                }
+            }
+        });
     </script>
 
 </body>

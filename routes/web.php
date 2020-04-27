@@ -37,8 +37,9 @@ Route::get('/profile', 'HomeController@profile')->name('profile');
 Route::get('/account/{id}','HomeController@account');
 
 Route::post('/send_freq','HomeController@send_freq')->name('friend_request');
-
 Route::post('/accept_freq','HomeController@accept_freq')->name('accept_frequest');
+Route::post('/get_frq','HomeController@get_frq')->name('get_frq');
+Route::post('/get_frq_pen','HomeController@get_frq_pen')->name('get_frq_pen');
 
 Route::get('/messenger', 'HomeController@messanger')->name('messanger');
 Route::get('/message/{id}', 'HomeController@getMessage')->name('message');
@@ -49,3 +50,4 @@ Route::get('/delete/post/{id}','HomeController@del_post')->name('del.post');
 
 Route::post('/like','HomeController@lik_post')->name('like');
 Route::post('/dis_like','HomeController@dislik_post')->name('dis_like');
+

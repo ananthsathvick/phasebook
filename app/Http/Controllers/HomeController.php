@@ -35,23 +35,23 @@ class HomeController extends Controller
 
     public function profile()
     {
-        $is_l = DB::table('reactions')->select('from_uid as fd','post_id')->where('from_uid',Auth::id());
+        $is_l = DB::table('reactions')->select('from_uid as fd', 'post_id')->where('from_uid', Auth::id());
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
         $posts = DB::table('posts')
-        ->where('user_id',Auth::id())
-        ->select('name','posts.created_at','post_image','post_caption','posts.pid','like_count','fd')
-        //->select('*')
-        //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
-        ->leftJoinSub($rec,'rec',function ($join) {
+            ->where('user_id', Auth::id())
+            ->select('name', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd')
+            //->select('*')
+            //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
+            ->leftJoinSub($rec, 'rec', function ($join) {
                 $join->on('rec.post_id', '=', 'posts.pid');
             })
             ->join('users', 'users.uid', '=', 'posts.user_id')
-            ->leftJoinSub($is_l,'is_l',function ($join) {
+            ->leftJoinSub($is_l, 'is_l', function ($join) {
                 $join->on('is_l.post_id', '=', 'posts.pid');
             })
-            ->orderBy('posts.created_at','desc')
+            ->orderBy('posts.created_at', 'desc')
             ->get();
-        return view('profile',compact('posts'));
+        return view('profile', compact('posts'));
         //return $posts;
         //return($likes);
     }
@@ -107,9 +107,24 @@ class HomeController extends Controller
 
     function send_freq(Request $request)
     {
-        $succ = DB::table('friend_reqs')->updateOrInsert(['from' => $request->from, 'to' => $request->to]);
+        $succ = DB::table('friend_reqs')->updateOrInsert(['from' => $request->from, 'to' => $request->to,'created_at'=>Carbon::now()]);
         if ($succ) {
             echo json_encode("success");
+            // pusher
+            $options = array(
+                'cluster' => 'ap2',
+                'useTLS' => true
+            );
+
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                $options
+            );
+            $name = DB::table('users')->where('uid',$request->from)->first();
+            $data = ['from' => $name->name, 'to' => $request->to]; 
+            $pusher->trigger('friend_req', 'req_sent', $data);
         } else {
             echo json_encode("failed");
         }
@@ -123,6 +138,18 @@ class HomeController extends Controller
         } else {
             echo json_encode("failed");
         }
+    }
+
+    function get_frq(Request $request)
+    {
+        $suc = DB::table('friend_reqs')->where('to', $request->id)->where('accepted', 0)->join('users', 'users.uid', '=', 'from')->orderBy('friend_reqs.created_at', 'desc')->get();
+        return view('friend_req.index', ['users' => $suc]);
+    }
+
+    function get_frq_pen(Request $request)
+    {
+        $suc = DB::table('friend_reqs')->where('to', $request->id)->where('accepted', 0)->join('users', 'users.uid', '=', 'from')->get();
+        return count($suc);
     }
 
     public function messanger()
@@ -192,16 +219,16 @@ class HomeController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
         $imageName = time() . '.' . request()->image->getClientOriginalExtension();
-        request()->image->move(public_path('img/'.str_replace(' ','_',strtolower(Auth::user()->name))), $imageName);
-        DB::table('posts')->insert([['post_image' => $imageName, 'post_caption' => request()->caption,'user_id'=> Auth::id(),'created_at'=> Carbon::now()]]);
+        request()->image->move(public_path('img/' . str_replace(' ', '_', strtolower(Auth::user()->name))), $imageName);
+        DB::table('posts')->insert([['post_image' => $imageName, 'post_caption' => request()->caption, 'user_id' => Auth::id(), 'created_at' => Carbon::now()]]);
         return back()->with('success', 'You have successfully created post.');
     }
 
     public function del_post($pid)
     {
-        $img = DB::table('posts')->where('pid',$pid)->first();
-         unlink(public_path('/img/'.str_replace(' ','_',strtolower(Auth::user()->name)).'/'.$img->post_image));
-        DB::table('posts')->where('pid',$pid)->delete();
+        $img = DB::table('posts')->where('pid', $pid)->first();
+        unlink(public_path('/img/' . str_replace(' ', '_', strtolower(Auth::user()->name)) . '/' . $img->post_image));
+        DB::table('posts')->where('pid', $pid)->delete();
         return back()->with('success', 'Post Deleted Successfully.');
     }
 
@@ -209,18 +236,16 @@ class HomeController extends Controller
     {
         $from = $request->from;
         $pid = $request->pid;
-        $post = DB::table('posts')->where('pid',$pid)->first();
-        DB::table('reactions')->insert(['from_uid'=>$from , 'to_uid'=>$post->user_id,'post_id'=>$post->pid]);
+        $post = DB::table('posts')->where('pid', $pid)->first();
+        DB::table('reactions')->insert(['from_uid' => $from, 'to_uid' => $post->user_id, 'post_id' => $post->pid]);
         echo json_encode("success");
-
     }
 
     public function dislik_post(Request $request)
     {
         $from = $request->from;
         $pid = $request->pid;
-        DB::table('reactions')->where('post_id',$pid)->where('from_uid',$from)->delete();
+        DB::table('reactions')->where('post_id', $pid)->where('from_uid', $from)->delete();
         echo json_encode("success");
-
     }
 }
