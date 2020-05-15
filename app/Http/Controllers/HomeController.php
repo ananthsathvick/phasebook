@@ -30,7 +30,30 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $is_l = DB::table('reactions')->select('from_uid as fd', 'post_id')->where('from_uid', Auth::id());
+        $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
+        $frnd = DB::table('friend_reqs')->select('from as uid')->where('to',Auth::id())->where('accepted',1);
+        $me = DB::table('users')->select('uid')->where('uid',Auth::id());
+        $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from',Auth::id())->where('accepted',1)->union($frnd)->union($me);
+        $posts = DB::table('posts')
+            // ->where('user_id', Auth::id())
+            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd')
+            //->select('*')
+            //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
+            ->leftJoinSub($rec, 'rec', function ($join) {
+                $join->on('rec.post_id', '=', 'posts.pid');
+            })
+            ->join('users', 'users.uid', '=', 'posts.user_id')
+            ->joinSub($all_frnd, 'frnds', function ($join) {
+                $join->on('frnds.uid', '=', 'users.uid');
+            })
+            ->leftJoinSub($is_l, 'is_l', function ($join) {
+                $join->on('is_l.post_id', '=', 'posts.pid');
+            })
+            ->orderBy('posts.created_at', 'desc')
+            ->get();
+           // return $posts;
+        return view('home', compact('posts'));
     }
 
     public function profile()
@@ -51,7 +74,8 @@ class HomeController extends Controller
             })
             ->orderBy('posts.created_at', 'desc')
             ->get();
-        return view('profile', compact('posts'));
+        $user = DB::table('users')->where('uid',Auth::id())->first();
+        return view('profile', compact('posts','user'));
         //return $posts;
         //return($likes);
     }
@@ -79,8 +103,24 @@ class HomeController extends Controller
                 $code = 1;
             }
         }
+        $is_l = DB::table('reactions')->select('from_uid as fd', 'post_id')->where('from_uid', Auth::id());
+        $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
+        $posts = DB::table('posts')
+            ->where('user_id', $id)
+            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd')
+            //->select('*')
+            //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
+            ->leftJoinSub($rec, 'rec', function ($join) {
+                $join->on('rec.post_id', '=', 'posts.pid');
+            })
+            ->join('users', 'users.uid', '=', 'posts.user_id')
+            ->leftJoinSub($is_l, 'is_l', function ($join) {
+                $join->on('is_l.post_id', '=', 'posts.pid');
+            })
+            ->orderBy('posts.created_at', 'desc')
+            ->get();
 
-        return view('account', compact('user', 'code'));
+        return view('account', compact('user', 'code', 'posts'));
     }
 
     function fetch(Request $request)
@@ -107,7 +147,7 @@ class HomeController extends Controller
 
     function send_freq(Request $request)
     {
-        $succ = DB::table('friend_reqs')->updateOrInsert(['from' => $request->from, 'to' => $request->to,'created_at'=>Carbon::now()]);
+        $succ = DB::table('friend_reqs')->updateOrInsert(['from' => $request->from, 'to' => $request->to, 'created_at' => Carbon::now()]);
         if ($succ) {
             echo json_encode("success");
             // pusher
@@ -122,8 +162,8 @@ class HomeController extends Controller
                 env('PUSHER_APP_ID'),
                 $options
             );
-            $name = DB::table('users')->where('uid',$request->from)->first();
-            $data = ['from' => $name->name, 'to' => $request->to]; 
+            $name = DB::table('users')->where('uid', $request->from)->first();
+            $data = ['from' => $name->name, 'to' => $request->to];
             $pusher->trigger('friend_req', 'req_sent', $data);
         } else {
             echo json_encode("failed");
@@ -222,6 +262,30 @@ class HomeController extends Controller
         request()->image->move(public_path('img/' . str_replace(' ', '_', strtolower(Auth::user()->name))), $imageName);
         DB::table('posts')->insert([['post_image' => $imageName, 'post_caption' => request()->caption, 'user_id' => Auth::id(), 'created_at' => Carbon::now()]]);
         return back()->with('success', 'You have successfully created post.');
+    }
+
+    public function uploadCover()
+    {
+        request()->validate([
+            'coverimg' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+       
+        $imageName = 'cover.' . request()->coverimg->getClientOriginalExtension();
+        request()->coverimg->move(public_path('img/' . str_replace(' ', '_', strtolower(Auth::user()->name))), $imageName);
+        DB::table('users')->where('uid',Auth::id())->update(['cover_pic' => $imageName]);
+        return back()->with('success', 'You have successfully update your cover pic.');
+    }
+
+    public function uploadpro()
+    {
+        request()->validate([
+            'proimg' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+       
+        $imageName = 'pro.' . request()->proimg->getClientOriginalExtension();
+        request()->proimg->move(public_path('img/' . str_replace(' ', '_', strtolower(Auth::user()->name))), $imageName);
+        DB::table('users')->where('uid',Auth::id())->update(['pro_pic' => $imageName]);
+        return back()->with('success', 'You have successfully update your Profile pic.');
     }
 
     public function del_post($pid)

@@ -33,6 +33,8 @@ Route::get('/autocomplete/fetch', 'HomeController@fetch')->name('user.search');
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/profile', 'HomeController@profile')->name('profile');
+Route::post('/upload-cover','HomeController@uploadCover')->name('upload-cover');
+Route::post('/upload-pro','HomeController@uploadpro')->name('upload-pro');
 
 Route::get('/account/{id}','HomeController@account');
 

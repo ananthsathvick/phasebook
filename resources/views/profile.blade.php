@@ -5,9 +5,21 @@
     <div class="row">
         <div class="col-11">
             <div id="cover-pic-div">
-                <img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic">
-                <img src="{{ asset('img/main.png') }}" alt="..." class="rounded-circle bottom-left">
-                <h4 id="pro-name">Ananth sathvick</h4>
+                <img id="cover-pic" src="@if($user->cover_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.$user->cover_pic)}} @endif" class="" alt="Cover pic">
+                <div id="pro-pic-div">
+                    <img src="@if($user->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.$user->pro_pic)}} @endif" alt="..." class="rounded-circle bottom-left" >
+                    <form action="{{ route('upload-pro') }}" method="POST" enctype="multipart/form-data" id="pro_form">
+                        @csrf
+                        <input type="file" id="inp_pro" name="proimg" onchange="$('#pro_form').submit()" hidden />
+                        <button id="edit_pro_btn" type="button" onclick="$('#inp_pro').click();" class="btn btn-light rounded-circle btn-sm"><i class="fas fa-camera"></i></button>
+                    </form>
+                </div>
+                <h4 id="pro-name">{{$user->name}}</h4>
+                <form action="{{ route('upload-cover') }}" method="POST" enctype="multipart/form-data" id="cover_form">
+                    @csrf
+                    <input type="file" id="inp_cover" name="coverimg" onchange="$('#cover_form').submit()" hidden />
+                    <button id="edit_cv_btn" type="button" onclick="cover_pic();" class="btn btn-secondary btn-sm "><i class="fas fa-camera"></i> Edit cover pic</button>
+                </form>
             </div>
             <div class="card text-center border-top-0 border-fb-col">
                 <div class="card-body p-0">
@@ -275,7 +287,7 @@
                     <p>{{$post->post_caption}}</p>
                     <img src="{{ asset('img/'.str_replace(' ','_',strtolower($post->name)).'/'.$post->post_image) }}" class="img-fluid" alt="Responsive image">
 
-                    <i class="far fa-thumbs-up"></i> <span id="{{$post->pid}}"> @if($post->like_count!=NULL)   {{$post->like_count}}@else   0 @endif</span>
+                    <div><i class="far fa-thumbs-up"></i> <span id="{{$post->pid}}"> @if($post->like_count!=NULL) {{$post->like_count}}@else 0 @endif</span></div>
                     <div class="dropdown-divider"></div>
                     <div class="row">
 
@@ -284,7 +296,7 @@
                             <i class="far fa-thumbs-up"></i> Like
                             @else
                             <div class="col justify-content-center text-center dis-like" type="button" val="{{$post->pid}}" style="color: dodgerblue;">
-                                <i class="fas fa-thumbs-up" ></i> Like
+                                <i class="fas fa-thumbs-up"></i> Like
                                 @endif
                             </div>
                             <div class="col text-center">
@@ -315,7 +327,12 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-            
+
+            function cover_pic() {
+                $("#inp_cover").click();
+
+            }
+
             $('.like,.dis-like').click(function() {
                 var pid = $(this).attr('val');
                 //console.log($id);
@@ -355,7 +372,7 @@
                             $chld.removeClass();
                             $chld.addClass('far fa-thumbs-up');
                             $pos.css('color', 'black');
-                            
+
                             // $pos.removeClass('dis-like');
                             // $pos.attr("class", "like");
                             $pos.toggleClass('like dis-like');

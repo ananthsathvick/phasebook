@@ -5,25 +5,28 @@
     <div class="row">
         <div class="col-11">
             <div id="cover-pic-div">
-                <img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic">
-                <img src="{{ asset('img/main.png') }}" alt="..." class="rounded-circle bottom-left">
                 <h4 id="pro-name">{{$user->name}}</h4>
-                <div class="bottom-right d-inline">
-                    <button type="button" class="btn btn-secondary btn-sm" id="send_frnd_req"> 
-                    @if($code == 3)
-                    <i class="fas fa-user-plus"></i> Add Friend
-                    @elseif($code == 1)
-                    <i class="fas fa-user-plus"></i> Accept Friend Request
-                    @elseif($code == 0)
-                    <i class="fas fa-user-plus"></i> Friend Request Sent
-                    @else
-                    <i class="fas fa-check"></i> Friends
-                    @endif
-                </button>
-                
-                <button type="button" @if($code != 2) style="display: none;" @endif  class="btn btn-secondary btn-sm" id="msg_btn"><i class="fab fa-facebook-messenger"></i> Message</button>
-                 
+                <img id="cover-pic" src="@if($user->cover_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($user->name)).'/'.$user->cover_pic)}} @endif" class="" alt="Cover pic">
+                <div id="pro-pic-div">
+                    <img src="@if($user->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($user->name)).'/'.$user->pro_pic)}} @endif" alt="..." class="rounded-circle bottom-left">
                     
+                </div>
+                <div class="bottom-right d-inline">
+                    <button type="button" class="btn btn-secondary btn-sm" id="send_frnd_req">
+                        @if($code == 3)
+                        <i class="fas fa-user-plus"></i> Add Friend
+                        @elseif($code == 1)
+                        <i class="fas fa-user-plus"></i> Accept Friend Request
+                        @elseif($code == 0)
+                        <i class="fas fa-user-plus"></i> Friend Request Sent
+                        @else
+                        <i class="fas fa-check"></i> Friends
+                        @endif
+                    </button>
+
+                    <button type="button" @if($code !=2) style="display: none;" @endif class="btn btn-secondary btn-sm" id="msg_btn"><i class="fab fa-facebook-messenger"></i> Message</button>
+
+
                 </div>
             </div>
             <div class="card text-center border-top-0 border-fb-col">
@@ -214,35 +217,58 @@
 
         </div>
         <div class="col-sm-6">
-            <div class="card">
-                <p class="card-header py-1 px-1">Create Post</p>
-                <div class="card-body cr-pos-cb">
-                    <div class="row">
-                        <div class="col-sm-2 mx-w-14">
-                            <img src="{{ asset('img/male_default.jpg') }}" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
-                        </div>
-                        <div class="col-sm pad-lef-0">
-                            <div class="input-group">
-                                <textarea class="cr-pos-ta" aria-label="With textarea" placeholder="What's on your mind"></textarea>
+            @if ($message = Session::get('success'))
+            <div class="alert alert-success alert-block">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <strong>{{ $message }}</strong>
+            </div>
+            @endif
+            @if (count($errors) > 0)
+            <div class="alert alert-danger">
+                <strong>Whoops!</strong> There were some problems with your input.
+                <ul>
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            <!-- <div class="card">
+                <form action="{{ route('upload-post') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <p class="card-header py-1 px-1">Create Post</p>
+                    <div class="card-body cr-pos-cb">
+                        <div class="row">
+                            <div class="col-sm-2 mx-w-14">
+                                <img src="{{ asset('img/male_default.jpg') }}" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="input-group">
-
-                                <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
-                                    <label class="custom-file-label" for="inputGroupFile01">Add Media</label>
+                            <div class="col-sm pad-lef-0">
+                                <div class="input-group">
+                                    <textarea class="cr-pos-ta" name="caption" aria-label="With textarea" placeholder="What's on your mind"></textarea>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="input-group">
+
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="inputGroupFile01" name="image" aria-describedby="inputGroupFileAddon01">
+                                        <label class="custom-file-label" for="inputGroupFile01">Add Media</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button type="submit" class="btn btn-primary btn-sm btn-block">Post</button>
                     </div>
-                    <div class="dropdown-divider"></div>
-                    <button type="button" class="btn btn-primary btn-sm btn-block">Post</button>
-                </div>
-            </div>
+                </form>
+            </div> -->
+            @if(count($posts) == 0)
+            <div class="text-muted text-center mt-3">No posts yet</div>
+            @endif
+            @foreach($posts as $post)
             <div class="card my-3">
                 <div class="card-body pb-0">
                     <!-- <div class="card-title"> -->
@@ -251,39 +277,56 @@
                             <img src="{{ asset('img/male_default.jpg') }}" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
                         </div>
                         <div class="col-sm pad-lef-0">
-                            User-name <br>
-                            <div class=" text-muted" style="font-size: 12px">12:38</div>
+                            {{$post->name}} <br>
+                            <div class=" text-muted" style="font-size: 12px">{{$post->created_at}}</div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="btn-group offset-md-4">
+                                <button class="btn btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a href="{{route('del.post',[$post->pid])}}">Delete Post</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- </div> -->
-                    <p>Documentation and examples for opting images into responsive behavior (so they never become larger than their parent elements) and add lightweight styles to them—all via classes.</p>
-                    <img src="{{ asset('img/main.png') }}" class="img-fluid" alt="Responsive image">
+                    <p>{{$post->post_caption}}</p>
+                    <img src="{{ asset('img/'.str_replace(' ','_',strtolower($post->name)).'/'.$post->post_image) }}" class="img-fluid" alt="Responsive image">
 
-                    <i class="far fa-thumbs-up"></i>Amogh,Srivatsa and 2 others
+                    <div><i class="far fa-thumbs-up"></i> <span id="{{$post->pid}}"> @if($post->like_count!=NULL) {{$post->like_count}}@else 0 @endif</span></div>
                     <div class="dropdown-divider"></div>
                     <div class="row">
-                        <div class="col justify-content-center text-center">
+
+                        @if($post->fd == NULL)
+                        <div class="col justify-content-center text-center like" type="button" val="{{$post->pid}}">
                             <i class="far fa-thumbs-up"></i> Like
-                        </div>
-                        <div class="col text-center">
-                            <i class="far fa-comment-alt"></i> Comment
+                            @else
+                            <div class="col justify-content-center text-center dis-like" type="button" val="{{$post->pid}}" style="color: dodgerblue;">
+                                <i class="fas fa-thumbs-up"></i> Like
+                                @endif
+                            </div>
+                            <div class="col text-center">
+                                <i class="far fa-comment-alt"></i> Comment
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="dropdown-divider"></div>
-                <div class="card-body py-0">
-                    <div class="row">
-                        <div class="col-sm-2 mx-w-14 ">
-                            <img src="{{ asset('img/male_default.jpg') }}" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
-                        </div>
-                        <div class="col-sm pad-lef-0">
-                            <div class="input-group">
-                                <input class="form-control cr-pos-img bg-com" aria-label="With textarea" placeholder="Comment..."></textarea>
+                    <div class="dropdown-divider"></div>
+                    <div class="card-body py-0">
+                        <div class="row">
+                            <div class="col-sm-2 mx-w-14 ">
+                                <img src="{{ asset('img/male_default.jpg') }}" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
+                            </div>
+                            <div class="col-sm pad-lef-0">
+                                <div class="input-group">
+                                    <input class="form-control cr-pos-img bg-com" aria-label="With textarea" placeholder="Comment..."></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                @endforeach
             </div>
         </div>
     </div>
@@ -294,45 +337,99 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+    $('.like,.dis-like').click(function() {
+        var pid = $(this).attr('val');
+        //console.log($id);
+        $pos = $(this);
+        $chld = $(this).children("i");
+        if ($pos.hasClass('like')) {
+            $.ajax({
+                type: 'POST',
+                url: '/like',
+                data: {
+                    from: '{{ Auth::id() }}',
+                    pid: pid
+                },
+                success: function(data) {
+                    console.log(data);
+                    $chld.removeClass();
+                    $chld.addClass('fas fa-thumbs-up');
+                    $pos.css('color', 'dodgerblue');
+                    // $pos.removeClass('like');
+                    // $pos.attr("class", "dis-like");
+                    $pos.toggleClass('like dis-like');
+                    $('#' + pid).html(parseInt($('#' + pid).html(), 10) + 1)
+
+                }
+            });
+
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: '/dis_like',
+                data: {
+                    from: '{{ Auth::id() }}',
+                    pid: pid
+                },
+                success: function(data) {
+                    console.log(data);
+                    $chld.removeClass();
+                    $chld.addClass('far fa-thumbs-up');
+                    $pos.css('color', 'black');
+
+                    // $pos.removeClass('dis-like');
+                    // $pos.attr("class", "like");
+                    $pos.toggleClass('like dis-like');
+                    $('#' + pid).html(parseInt($('#' + pid).html(), 10) - 1);
+                }
+            });
+
+        }
+
+    });
 
     $('#send_frnd_req').click(function() {
         @if($code == 3)
-        
-            $.ajax({
-                type: 'POST',
-                url: '/send_freq',
-                data: {from: '{{ Auth::id() }}' , to: '{{$user->uid}}'},
-                success: function(data) {
-                    //$("#msg").html(data.msg);
-                    console.log(data);
-                    if(JSON.parse(data) == "success")
-                    {
 
-                        $('#send_frnd_req').html('<i class="fas fa-user-plus"></i> Friend Request Sent');
+        $.ajax({
+            type: 'POST',
+            url: '/send_freq',
+            data: {
+                from: '{{ Auth::id() }}',
+                to: '{{$user->uid}}'
+            },
+            success: function(data) {
+                //$("#msg").html(data.msg);
+                console.log(data);
+                if (JSON.parse(data) == "success") {
 
-                        //console.log($(this));
-                    }
+                    $('#send_frnd_req').html('<i class="fas fa-user-plus"></i> Friend Request Sent');
+
+                    //console.log($(this));
                 }
-            });
+            }
+        });
         @elseif($code == 1)
-            $.ajax({
-                    type: 'POST',
-                    url: '/accept_freq',
-                    data: {to: '{{ Auth::id() }}' , from: '{{$user->uid}}'},
-                    success: function(data) {
-                        //$("#msg").html(data.msg);
-                        console.log(data);
-                        if(JSON.parse(data) == "success")
-                        {
+        $.ajax({
+            type: 'POST',
+            url: '/accept_freq',
+            data: {
+                to: '{{ Auth::id() }}',
+                from: '{{$user->uid}}'
+            },
+            success: function(data) {
+                //$("#msg").html(data.msg);
+                console.log(data);
+                if (JSON.parse(data) == "success") {
 
-                            $('#send_frnd_req').html('<i class="fas fa-check"></i> Friends');
-                            $('#msg_btn').show();
+                    $('#send_frnd_req').html('<i class="fas fa-check"></i> Friends');
+                    $('#msg_btn').show();
 
-                            //console.log($(this));
-                        }
-                    }
-                });
-            
+                    //console.log($(this));
+                }
+            }
+        });
+
         @endif
 
     });

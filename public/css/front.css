@@ -160,6 +160,19 @@ body {
     color: white;
 }
 
+#edit_cv_btn {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    opacity: 80%;
+}
+
+#edit_pro_btn {
+    position: absolute;
+    bottom: 27px;
+    left: 144px;
+}
+
 .border-fb-col {
     border-color: #e9eaed;
     color: #385898;
