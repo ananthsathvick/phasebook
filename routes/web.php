@@ -52,4 +52,6 @@ Route::get('/delete/post/{id}','HomeController@del_post')->name('del.post');
 
 Route::post('/like','HomeController@lik_post')->name('like');
 Route::post('/dis_like','HomeController@dislik_post')->name('dis_like');
+Route::post('/comment','HomeController@comment')->name('comment');
+Route::post('/get_comment','HomeController@get_comment')->name('get_comment');
 

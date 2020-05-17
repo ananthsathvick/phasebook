@@ -233,38 +233,6 @@
                 </ul>
             </div>
             @endif
-            <!-- <div class="card">
-                <form action="{{ route('upload-post') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <p class="card-header py-1 px-1">Create Post</p>
-                    <div class="card-body cr-pos-cb">
-                        <div class="row">
-                            <div class="col-sm-2 mx-w-14">
-                                <img src="{{ asset('img/male_default.jpg') }}" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
-                            </div>
-                            <div class="col-sm pad-lef-0">
-                                <div class="input-group">
-                                    <textarea class="cr-pos-ta" name="caption" aria-label="With textarea" placeholder="What's on your mind"></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="input-group">
-
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="inputGroupFile01" name="image" aria-describedby="inputGroupFileAddon01">
-                                        <label class="custom-file-label" for="inputGroupFile01">Add Media</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <button type="submit" class="btn btn-primary btn-sm btn-block">Post</button>
-                    </div>
-                </form>
-            </div> -->
             @if(count($posts) == 0)
             <div class="text-muted text-center mt-3">No posts yet</div>
             @endif
@@ -274,7 +242,7 @@
                     <!-- <div class="card-title"> -->
                     <div class="row mb-1">
                         <div class="col-sm-2 mx-w-14">
-                            <img src="{{ asset('img/male_default.jpg') }}" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
+                            <img src="@if($post->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($post->name)).'/'.$post->pro_pic)}} @endif" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
                         </div>
                         <div class="col-sm pad-lef-0">
                             {{$post->name}} <br>

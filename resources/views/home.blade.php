@@ -92,7 +92,7 @@
                     <!-- <div class="card-title"> -->
                     <div class="row mb-1">
                         <div class="col-sm-2 mx-w-14">
-                            <img src="{{ asset('img/male_default.jpg') }}" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
+                            <img src="@if($post->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($post->name)).'/'.$post->pro_pic)}} @endif" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
                         </div>
                         <div class="col-sm pad-lef-0">
                             <a href="/account/{{$post->uid}}">{{$post->name}} </a><br>
@@ -127,7 +127,7 @@
                                 <i class="fas fa-thumbs-up"></i> Like
                                 @endif
                             </div>
-                            <div class="col text-center">
+                            <div class="col text-center getc" type="button" id="getc_{{$post->pid}}">
                                 <i class="far fa-comment-alt"></i> Comment
                             </div>
                         </div>
@@ -140,78 +140,124 @@
                             </div>
                             <div class="col-sm pad-lef-0">
                                 <div class="input-group">
-                                    <input class="form-control cr-pos-img bg-com" aria-label="With textarea" placeholder="Comment..."></textarea>
+                                    <input class="form-control cr-pos-img bg-com comment" id="comm_{{$post->pid}}" aria-label="With textarea" placeholder="Comment..."></textarea>
                                 </div>
                             </div>
                         </div>
+                        <div class="dropdown-divider"></div>
+                        <div id="app_{{$post->pid}}"></div>
+
                     </div>
                 </div>
                 @endforeach
             </div>
-        
 
-        <div class="col-sm-2">
-            One of three columns
+
+            <div class="col-sm-2">
+                One of three columns
+            </div>
         </div>
     </div>
 </div>
-</div>
 <script>
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    $('.getc').click(function() {
+        var iid = $(this).attr('id');
+        var pid = iid.split('_')[1];
+        console.log(pid);
+        $.ajax({
+            type: 'POST',
+            url: '/get_comment',
+            data: {
+                pid: pid
+            },
+            success: function(data) {
+                console.log('#app_' + pid);
+                $('#app_' + pid).html(data);
+            }
+        });
+    });
+
+    $('.comment').keypress(function(e) {
+        var key = e.which;
+        if (key == 13) // the enter key code
+        {
+            var com = $(this).val();
+            var pid = $(this).attr('id');
+            $(this).val('');
+            $.ajax({
+                type: 'POST',
+                url: '/comment',
+                data: {
+                    from: '{{ Auth::id() }}',
+                    pid: pid,
+                    comment: com
+                },
+                success: function(data) {
+
+                    pid = pid.split("_")[1];
+                    console.log('#app_' + pid);
+                    $('#app_' + pid).html(data);
                 }
             });
-            
-            $('.like,.dis-like').click(function() {
-                var pid = $(this).attr('val');
-                //console.log($id);
-                $pos = $(this);
-                $chld = $(this).children("i");
-                if ($pos.hasClass('like')) {
-                    $.ajax({
-                        type: 'POST',
-                        url: '/like',
-                        data: {
-                            from: '{{ Auth::id() }}',
-                            pid: pid
-                        },
-                        success: function(data) {
-                            console.log(data);
-                            $chld.removeClass();
-                            $chld.addClass('fas fa-thumbs-up');
-                            $pos.css('color', 'dodgerblue');
-                            // $pos.removeClass('like');
-                            // $pos.attr("class", "dis-like");
-                            $pos.toggleClass('like dis-like');
-                            $('#' + pid).html(parseInt($('#' + pid).html(), 10) + 1)
 
-                        }
-                    });
+        }
+    });
 
-                } else {
-                    $.ajax({
-                        type: 'POST',
-                        url: '/dis_like',
-                        data: {
-                            from: '{{ Auth::id() }}',
-                            pid: pid
-                        },
-                        success: function(data) {
-                            console.log(data);
-                            $chld.removeClass();
-                            $chld.addClass('far fa-thumbs-up');
-                            $pos.css('color', 'black');
-                            
-                            // $pos.removeClass('dis-like');
-                            // $pos.attr("class", "like");
-                            $pos.toggleClass('like dis-like');
-                            $('#' + pid).html(parseInt($('#' + pid).html(), 10) - 1);
-                        }
-                    });
+    $('.like,.dis-like').click(function() {
+        var pid = $(this).attr('val');
+        //console.log($id);
+        $pos = $(this);
+        $chld = $(this).children("i");
+        if ($pos.hasClass('like')) {
+            $.ajax({
+                type: 'POST',
+                url: '/like',
+                data: {
+                    from: '{{ Auth::id() }}',
+                    pid: pid
+                },
+                success: function(data) {
+                    console.log(data);
+                    $chld.removeClass();
+                    $chld.addClass('fas fa-thumbs-up');
+                    $pos.css('color', 'dodgerblue');
+                    // $pos.removeClass('like');
+                    // $pos.attr("class", "dis-like");
+                    $pos.toggleClass('like dis-like');
+                    $('#' + pid).html(parseInt($('#' + pid).html(), 10) + 1)
 
                 }
-
             });
-        </script>
+
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: '/dis_like',
+                data: {
+                    from: '{{ Auth::id() }}',
+                    pid: pid
+                },
+                success: function(data) {
+                    console.log(data);
+                    $chld.removeClass();
+                    $chld.addClass('far fa-thumbs-up');
+                    $pos.css('color', 'black');
+
+                    // $pos.removeClass('dis-like');
+                    // $pos.attr("class", "like");
+                    $pos.toggleClass('like dis-like');
+                    $('#' + pid).html(parseInt($('#' + pid).html(), 10) - 1);
+                }
+            });
+
+        }
+
+    });
+</script>
 @endsection

@@ -35,9 +35,10 @@ class HomeController extends Controller
         $frnd = DB::table('friend_reqs')->select('from as uid')->where('to',Auth::id())->where('accepted',1);
         $me = DB::table('users')->select('uid')->where('uid',Auth::id());
         $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from',Auth::id())->where('accepted',1)->union($frnd)->union($me);
-        $posts = DB::table('posts')
+        $posts = DB::table('posts')->distinct()
             // ->where('user_id', Auth::id())
-            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd')
+            
+            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd','pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -52,7 +53,7 @@ class HomeController extends Controller
             })
             ->orderBy('posts.created_at', 'desc')
             ->get();
-           // return $posts;
+            //return $comment;
         return view('home', compact('posts'));
     }
 
@@ -62,7 +63,7 @@ class HomeController extends Controller
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
         $posts = DB::table('posts')
             ->where('user_id', Auth::id())
-            ->select('name', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd')
+            ->select('name', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd','pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -72,6 +73,7 @@ class HomeController extends Controller
             ->leftJoinSub($is_l, 'is_l', function ($join) {
                 $join->on('is_l.post_id', '=', 'posts.pid');
             })
+            
             ->orderBy('posts.created_at', 'desc')
             ->get();
         $user = DB::table('users')->where('uid',Auth::id())->first();
@@ -107,7 +109,7 @@ class HomeController extends Controller
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
         $posts = DB::table('posts')
             ->where('user_id', $id)
-            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd')
+            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd','pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -311,5 +313,24 @@ class HomeController extends Controller
         $pid = $request->pid;
         DB::table('reactions')->where('post_id', $pid)->where('from_uid', $from)->delete();
         echo json_encode("success");
+    }
+
+    public function comment(Request $request)
+    {
+        $from = $request->from;
+        $comment = $request->comment;
+        $pid = explode("_",$request->pid)[1];
+        $to = DB::table('posts')->where('pid',$pid)->first();
+        //return $to;
+        DB::table('comments')->insert(['comment'=>$comment,'from_uid'=>$from,'to_uid'=>$to->user_id,'post_id'=>$pid,'created_at' => Carbon::now()]);
+        $comm = DB::table('comments')->where('post_id',$pid)->join('users','users.uid','=','from_uid')->orderBy('comments.created_at','desc')->get();
+        return view('comment.index',compact('comm'));
+    }
+
+    public function get_comment(Request $request)
+    {
+        $comm = DB::table('comments')->where('post_id',$request->pid)->join('users','users.uid','=','from_uid')->orderBy('comments.created_at','desc')->get();
+        return view('comment.index',compact('comm'));
+
     }
 }

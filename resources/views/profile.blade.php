@@ -266,7 +266,7 @@
                     <!-- <div class="card-title"> -->
                     <div class="row mb-1">
                         <div class="col-sm-2 mx-w-14">
-                            <img src="{{ asset('img/male_default.jpg') }}" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
+                            <img src="@if($post->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($post->name)).'/'.$post->pro_pic)}} @endif" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
                         </div>
                         <div class="col-sm pad-lef-0">
                             {{$post->name}} <br>
