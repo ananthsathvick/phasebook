@@ -1,58 +1,6 @@
-@extends('layouts.all_pages')
+@extends('pro_layout')
 
-@section('content')
-<div class="container">
-    <div class="row">
-        <div class="col-11">
-            <div id="cover-pic-div">
-                <img id="cover-pic" src="@if($user->cover_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.$user->cover_pic)}} @endif" class="" alt="Cover pic">
-                <div id="pro-pic-div">
-                    <img src="@if($user->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.$user->pro_pic)}} @endif" alt="..." class="rounded-circle bottom-left" >
-                    <form action="{{ route('upload-pro') }}" method="POST" enctype="multipart/form-data" id="pro_form">
-                        @csrf
-                        <input type="file" id="inp_pro" name="proimg" onchange="$('#pro_form').submit()" hidden />
-                        <button id="edit_pro_btn" type="button" onclick="$('#inp_pro').click();" class="btn btn-light rounded-circle btn-sm"><i class="fas fa-camera"></i></button>
-                    </form>
-                </div>
-                <h4 id="pro-name">{{$user->name}}</h4>
-                <form action="{{ route('upload-cover') }}" method="POST" enctype="multipart/form-data" id="cover_form">
-                    @csrf
-                    <input type="file" id="inp_cover" name="coverimg" onchange="$('#cover_form').submit()" hidden />
-                    <button id="edit_cv_btn" type="button" onclick="cover_pic();" class="btn btn-secondary btn-sm "><i class="fas fa-camera"></i> Edit cover pic</button>
-                </form>
-            </div>
-            <div class="card text-center border-top-0 border-fb-col">
-                <div class="card-body p-0">
-
-                    <div class="row justify-content-center">
-
-                        <div class="col-auto  border-right border-left border-fb-col  py-2 px-3">
-                            <div class="mx-4">
-                                Timeline
-                            </div>
-                        </div>
-                        <div class="col-auto border-right  border-fb-col p-2">
-                            <div class="mx-4">
-                                About
-                            </div>
-                        </div>
-                        <div class="col-auto  border-right  border-fb-col p-2">
-                            <div class="mx-4">
-                                Friends
-                            </div>
-                        </div>
-                        <div class="col-auto  border-right  border-fb-col p-2">
-                            <div class="mx-4">
-                                Photos
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+@section('con')
 <div class="container mt-3">
     <div class="row">
         <div class="col-5">
@@ -66,35 +14,35 @@
                     </div>
                     <div class="row justify-content-center my-2">
                         <div class="col-auto text-center">
-                            <div> Get vector icons and social logos on your website with Font Awesome, the web's most popular icon set and toolkit. </div>
+                            <div>{{$user->bio}}</div>
                         </div>
                     </div>
                     <div class="dropdown-divider"></div>
                     <div class="row mb-3">
                         <div class="col-auto">
                             <i class="fas fa-briefcase"></i>
-                            <div class="d-inline"> Work Place</div>
+                            <div class="d-inline">{{$user->work}}</div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-auto">
                             <i class="fas fa-graduation-cap"></i>
-                            <div class="d-inline"> Study</div>
+                            <div class="d-inline">{{$user->study}}</div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-auto">
                             <i class="fas fa-calendar-alt"></i>
-                            <div class="d-inline"> Date of Birth</div>
+                            <div class="d-inline">{{$user->dob}}</div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-auto">
                             <i class="fas fa-venus-mars"></i>
-                            <div class="d-inline"> Gender</div>
+                            <div class="d-inline">{{$user->gender}}</div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-secondary btn-sm btn-block">Edit Details</button>
+                    <a href="/profile/edit" type="button" class="btn btn-secondary btn-sm btn-block">Edit Details</a>
                 </div>
             </div>
 

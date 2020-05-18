@@ -20,7 +20,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('verified');
     }
 
     /**
@@ -80,6 +80,17 @@ class HomeController extends Controller
         return view('profile', compact('posts','user'));
         //return $posts;
         //return($likes);
+    }
+    public function edit_profile()
+    {
+        $user = DB::table('users')->where('uid',Auth::id())->first();
+        return view('edit_profile',compact('user'));
+    }
+    public function update_profile(Request $request)
+    {
+        DB::table('users')->where('uid',Auth::id())->update(['bio'=>$request->bio,'work'=>$request->work,'study'=>$request->study]);
+        return redirect('/profile');
+
     }
 
     public function account($id)

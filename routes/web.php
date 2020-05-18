@@ -26,13 +26,15 @@ Route::get('/', function () {
     
 });
 
-Auth::routes();
+Auth::routes(['verify' => true]);
 
 Route::get('/autocomplete/fetch', 'HomeController@fetch')->name('user.search');
 
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/profile', 'HomeController@profile')->name('profile');
+Route::get('/profile/edit','HomeController@edit_profile');
+Route::get('update_profile','HomeController@update_profile');
 Route::post('/upload-cover','HomeController@uploadCover')->name('upload-cover');
 Route::post('/upload-pro','HomeController@uploadpro')->name('upload-pro');
 
