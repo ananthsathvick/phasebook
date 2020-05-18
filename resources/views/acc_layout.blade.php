@@ -70,6 +70,50 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+
+    $('.getc').click(function() {
+        var iid = $(this).attr('id');
+        var pid = iid.split('_')[1];
+        console.log(pid);
+        $.ajax({
+            type: 'POST',
+            url: '/get_comment',
+            data: {
+                pid: pid
+            },
+            success: function(data) {
+                console.log('#app_' + pid);
+                $('#app_' + pid).html(data);
+            }
+        });
+    });
+
+    $('.comment').keypress(function(e) {
+        var key = e.which;
+        if (key == 13) // the enter key code
+        {
+            var com = $(this).val();
+            var pid = $(this).attr('id');
+            $(this).val('');
+            $.ajax({
+                type: 'POST',
+                url: '/comment',
+                data: {
+                    from: '{{ Auth::id() }}',
+                    pid: pid,
+                    comment: com
+                },
+                success: function(data) {
+
+                    pid = pid.split("_")[1];
+                    console.log('#app_' + pid);
+                    $('#app_' + pid).html(data);
+                }
+            });
+
+        }
+    });
+    
     $('.like,.dis-like').click(function() {
         var pid = $(this).attr('val');
         //console.log($id);

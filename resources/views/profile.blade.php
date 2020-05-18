@@ -57,9 +57,11 @@
                     <div class="row mt-2">
                         <div class="col">
                             <div class="grid">
-                            @foreach($posts as $post)
-                            <a href="#pos_{{$post->pid}}"><div><img src="{{ asset('img/'.str_replace(' ','_',strtolower($post->name)).'/'.$post->post_image) }}" class="" alt="Cover pic" style="object-fit:contain"></div></a>
-                            @endforeach
+                                @foreach($posts as $post)
+                                <a href="#pos_{{$post->pid}}">
+                                    <div><img src="{{ asset('img/'.str_replace(' ','_',strtolower($post->name)).'/'.$post->post_image) }}" class="" alt="Cover pic" style="object-fit:contain"></div>
+                                </a>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -157,10 +159,11 @@
                             <img src="@if($post->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($post->name)).'/'.$post->pro_pic)}} @endif" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
                         </div>
                         <div class="col-sm pad-lef-0">
-                            {{$post->name}} <br>
+                            <a href="/account/{{$post->uid}}">{{$post->name}} </a><br>
                             <div class=" text-muted" style="font-size: 12px">{{$post->created_at}}</div>
                         </div>
                         <div class="col-sm-2">
+                            @if(Auth::user()->uid == $post->uid)
                             <div class="btn-group offset-md-4">
                                 <button class="btn btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 </button>
@@ -168,6 +171,7 @@
                                     <a href="{{route('del.post',[$post->pid])}}">Delete Post</a>
                                 </div>
                             </div>
+                            @endif
                         </div>
                     </div>
 
@@ -187,7 +191,7 @@
                                 <i class="fas fa-thumbs-up"></i> Like
                                 @endif
                             </div>
-                            <div class="col text-center">
+                            <div class="col text-center getc" type="button" id="getc_{{$post->pid}}">
                                 <i class="far fa-comment-alt"></i> Comment
                             </div>
                         </div>
@@ -200,10 +204,13 @@
                             </div>
                             <div class="col-sm pad-lef-0">
                                 <div class="input-group">
-                                    <input class="form-control cr-pos-img bg-com" aria-label="With textarea" placeholder="Comment..."></textarea>
+                                    <input class="form-control cr-pos-img bg-com comment" id="comm_{{$post->pid}}" aria-label="With textarea" placeholder="Comment..."></textarea>
                                 </div>
                             </div>
                         </div>
+                        <div class="dropdown-divider"></div>
+                        <div id="app_{{$post->pid}}"></div>
+
                     </div>
                 </div>
                 @endforeach
@@ -213,6 +220,49 @@
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $('.getc').click(function() {
+                var iid = $(this).attr('id');
+                var pid = iid.split('_')[1];
+                console.log(pid);
+                $.ajax({
+                    type: 'POST',
+                    url: '/get_comment',
+                    data: {
+                        pid: pid
+                    },
+                    success: function(data) {
+                        console.log('#app_' + pid);
+                        $('#app_' + pid).html(data);
+                    }
+                });
+            });
+
+            $('.comment').keypress(function(e) {
+                var key = e.which;
+                if (key == 13) // the enter key code
+                {
+                    var com = $(this).val();
+                    var pid = $(this).attr('id');
+                    $(this).val('');
+                    $.ajax({
+                        type: 'POST',
+                        url: '/comment',
+                        data: {
+                            from: '{{ Auth::id() }}',
+                            pid: pid,
+                            comment: com
+                        },
+                        success: function(data) {
+
+                            pid = pid.split("_")[1];
+                            console.log('#app_' + pid);
+                            $('#app_' + pid).html(data);
+                        }
+                    });
+
                 }
             });
 

@@ -63,7 +63,7 @@ class HomeController extends Controller
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
         $posts = DB::table('posts')
             ->where('user_id', Auth::id())
-            ->select('name', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
+            ->select('uid','name', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
