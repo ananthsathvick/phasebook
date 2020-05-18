@@ -123,7 +123,15 @@
                     <!-- <div class="card-title"> -->
                     <div class="row mb-1">
                         <div class="col-sm-2 mx-w-14">
-                            <img src="@if($post->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($post->name)).'/'.$post->pro_pic)}} @endif" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
+                            <img src="@if($post->pro_pic  == NULL)
+                                @if($post->gender == 'Male')
+                                {{ asset('img/male_default.png') }}
+                                @else
+                                {{ asset('img/female_default.jpg') }}
+                                @endif
+                              @else 
+                              {{asset('img/'. str_replace(' ', '_', strtolower($post->name)).'/'.$post->pro_pic)}} 
+                            @endif" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
                         </div>
                         <div class="col-sm pad-lef-0">
                             <a href="/account/{{$post->uid}}">{{$post->name}} </a><br>
@@ -167,7 +175,15 @@
                     <div class="card-body py-0">
                         <div class="row">
                             <div class="col-sm-2 mx-w-14 ">
-                                <img src="{{ asset('img/male_default.jpg') }}" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
+                                <img src="@if(Auth::user()->pro_pic  == NULL)
+                                @if(Auth::user()->gender == 'Male')
+                                {{ asset('img/male_default.png') }}
+                                @else
+                                {{ asset('img/female_default.jpg') }}
+                                @endif
+                              @else 
+                              {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.Auth::user()->pro_pic)}} 
+                            @endif" class="rounded mx-auto d-block img-fluid cr-pos-img" alt="Image">
                             </div>
                             <div class="col-sm pad-lef-0">
                                 <div class="input-group">

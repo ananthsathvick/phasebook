@@ -5,9 +5,17 @@
     <div class="row">
         <div class="col-11">
             <div id="cover-pic-div">
-                <img id="cover-pic" src="@if($user->cover_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.$user->cover_pic)}} @endif" class="" alt="Cover pic">
+                <img id="cover-pic" src="@if($user->cover_pic  == NULL){{ asset('img/def_cover.jpeg') }}@else {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.$user->cover_pic)}} @endif" class="" alt="Cover pic">
                 <div id="pro-pic-div">
-                    <img src="@if($user->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.$user->pro_pic)}} @endif" alt="..." class="rounded-circle bottom-left">
+                    <img src="@if(Auth::user()->pro_pic  == NULL)
+                                @if(Auth::user()->gender == 'Male')
+                                {{ asset('img/male_default.png') }}
+                                @else
+                                {{ asset('img/female_default.jpg') }}
+                                @endif
+                              @else 
+                              {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.Auth::user()->pro_pic)}} 
+                            @endif" alt="..." class="rounded-circle bottom-left">
                     <form action="{{ route('upload-pro') }}" method="POST" enctype="multipart/form-data" id="pro_form">
                         @csrf
                         <input type="file" id="inp_pro" name="proimg" onchange="$('#pro_form').submit()" hidden />

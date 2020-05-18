@@ -6,9 +6,17 @@
         <div class="col-11">
             <div id="cover-pic-div">
                 <h4 id="pro-name">{{$user->name}}</h4>
-                <img id="cover-pic" src="@if($user->cover_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($user->name)).'/'.$user->cover_pic)}} @endif" class="" alt="Cover pic">
+                <img id="cover-pic" src="@if($user->cover_pic  == NULL){{ asset('img/def_cover.jpeg') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($user->name)).'/'.$user->cover_pic)}} @endif" class="" alt="Cover pic">
                 <div id="pro-pic-div">
-                    <img src="@if($user->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($user->name)).'/'.$user->pro_pic)}} @endif" alt="..." class="rounded-circle bottom-left">
+                    <img src="@if($user->pro_pic  == NULL)
+                                @if($user->gender == 'Male')
+                                {{ asset('img/male_default.png') }}
+                                @else
+                                {{ asset('img/female_default.jpg') }}
+                                @endif
+                              @else 
+                              {{asset('img/'. str_replace(' ', '_', strtolower($user->name)).'/'.$user->pro_pic)}} 
+                            @endif" alt="..." class="rounded-circle bottom-left">
 
                 </div>
                 <div class="bottom-right d-inline">
@@ -113,7 +121,7 @@
 
         }
     });
-    
+
     $('.like,.dis-like').click(function() {
         var pid = $(this).attr('val');
         //console.log($id);

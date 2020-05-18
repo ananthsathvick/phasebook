@@ -38,7 +38,7 @@ class HomeController extends Controller
         $posts = DB::table('posts')->distinct()
             // ->where('user_id', Auth::id())
 
-            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
+            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic','gender')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -63,7 +63,7 @@ class HomeController extends Controller
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
         $posts = DB::table('posts')
             ->where('user_id', Auth::id())
-            ->select('uid','name', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
+            ->select('uid','name','gender', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -136,7 +136,7 @@ class HomeController extends Controller
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
         $posts = DB::table('posts')
             ->where('user_id', $id)
-            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
+            ->select('name', 'users.uid','gender', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
