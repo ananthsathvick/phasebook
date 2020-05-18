@@ -34,11 +34,13 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/profile', 'HomeController@profile')->name('profile');
 Route::get('/profile/edit','HomeController@edit_profile');
+Route::get('/friends','HomeController@friends');
 Route::get('update_profile','HomeController@update_profile');
 Route::post('/upload-cover','HomeController@uploadCover')->name('upload-cover');
 Route::post('/upload-pro','HomeController@uploadpro')->name('upload-pro');
 
 Route::get('/account/{id}','HomeController@account');
+Route::get('/account/{id}/friends','HomeController@account_friends');
 
 Route::post('/send_freq','HomeController@send_freq')->name('friend_request');
 Route::post('/accept_freq','HomeController@accept_freq')->name('accept_frequest');

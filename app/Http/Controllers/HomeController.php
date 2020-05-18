@@ -32,13 +32,13 @@ class HomeController extends Controller
     {
         $is_l = DB::table('reactions')->select('from_uid as fd', 'post_id')->where('from_uid', Auth::id());
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
-        $frnd = DB::table('friend_reqs')->select('from as uid')->where('to',Auth::id())->where('accepted',1);
-        $me = DB::table('users')->select('uid')->where('uid',Auth::id());
-        $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from',Auth::id())->where('accepted',1)->union($frnd)->union($me);
+        $frnd = DB::table('friend_reqs')->select('from as uid')->where('to', Auth::id())->where('accepted', 1);
+        $me = DB::table('users')->select('uid')->where('uid', Auth::id());
+        $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from', Auth::id())->where('accepted', 1)->union($frnd)->union($me);
         $posts = DB::table('posts')->distinct()
             // ->where('user_id', Auth::id())
-            
-            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd','pro_pic')
+
+            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -53,7 +53,7 @@ class HomeController extends Controller
             })
             ->orderBy('posts.created_at', 'desc')
             ->get();
-            //return $comment;
+        //return $comment;
         return view('home', compact('posts'));
     }
 
@@ -63,7 +63,7 @@ class HomeController extends Controller
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
         $posts = DB::table('posts')
             ->where('user_id', Auth::id())
-            ->select('name', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd','pro_pic')
+            ->select('name', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -73,24 +73,40 @@ class HomeController extends Controller
             ->leftJoinSub($is_l, 'is_l', function ($join) {
                 $join->on('is_l.post_id', '=', 'posts.pid');
             })
-            
+
             ->orderBy('posts.created_at', 'desc')
             ->get();
-        $user = DB::table('users')->where('uid',Auth::id())->first();
-        return view('profile', compact('posts','user'));
+        $user = DB::table('users')->where('uid', Auth::id())->first();
+        $frnd = DB::table('friend_reqs')->select('from as uid')->where('to', Auth::id())->where('accepted', 1);
+        $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from', Auth::id())->where('accepted', 1)->union($frnd);
+        $users_frnd = DB::table('users')->joinSub($all_frnd, 'frnds', function ($join) {
+            $join->on('frnds.uid', '=', 'users.uid');
+        })->get();
+        return view('profile', compact('posts', 'user', 'users_frnd'));
         //return $posts;
         //return($likes);
     }
     public function edit_profile()
     {
-        $user = DB::table('users')->where('uid',Auth::id())->first();
-        return view('edit_profile',compact('user'));
+        $user = DB::table('users')->where('uid', Auth::id())->first();
+        return view('edit_profile', compact('user'));
     }
     public function update_profile(Request $request)
     {
-        DB::table('users')->where('uid',Auth::id())->update(['bio'=>$request->bio,'work'=>$request->work,'study'=>$request->study]);
+        DB::table('users')->where('uid', Auth::id())->update(['bio' => $request->bio, 'work' => $request->work, 'study' => $request->study]);
         return redirect('/profile');
+    }
 
+    public function friends()
+    {
+        $frnd = DB::table('friend_reqs')->select('from as uid')->where('to', Auth::id())->where('accepted', 1);
+        $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from', Auth::id())->where('accepted', 1)->union($frnd);
+        $users = DB::table('users')->joinSub($all_frnd, 'frnds', function ($join) {
+            $join->on('frnds.uid', '=', 'users.uid');
+        })->get();
+        $user = DB::table('users')->where('uid', Auth::id())->first();
+        //return $users;
+        return view('friends', compact('users', 'user'));
     }
 
     public function account($id)
@@ -120,7 +136,7 @@ class HomeController extends Controller
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
         $posts = DB::table('posts')
             ->where('user_id', $id)
-            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd','pro_pic')
+            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -132,8 +148,46 @@ class HomeController extends Controller
             })
             ->orderBy('posts.created_at', 'desc')
             ->get();
+        $frnd = DB::table('friend_reqs')->select('from as uid')->where('to', $id)->where('accepted', 1);
+        $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from', $id)->where('accepted', 1)->union($frnd);
+        $users_frnd = DB::table('users')->joinSub($all_frnd, 'frnds', function ($join) {
+            $join->on('frnds.uid', '=', 'users.uid');
+        })->get();
 
-        return view('account', compact('user', 'code', 'posts'));
+        return view('account', compact('user', 'code', 'posts','users_frnd'));
+    }
+
+    public function account_friends($id)
+    {
+        if (Auth::id() == $id)
+            return redirect('/friends');
+
+        $user = DB::table('users')->where('uid', $id)->first();
+        $code = 3;
+        if (DB::table('friend_reqs')->where([['from', Auth::id()], ['to', $id]])->exists()) {
+            $freq_sent = DB::table('friend_reqs')->where([['from', Auth::id()], ['to', $id]])->first();
+            if ($freq_sent->accepted) {
+                $code = 2;
+            } else {
+                $code = 0;
+            }
+        }
+        if (DB::table('friend_reqs')->where([['to', Auth::id()], ['from', $id]])->exists()) {
+            $freq_got = DB::table('friend_reqs')->where([['to', Auth::id()], ['from', $id]])->first();
+            if ($freq_got->accepted) {
+                $code = 2;
+            } else {
+                $code = 1;
+            }
+        }
+        $frnd = DB::table('friend_reqs')->select('from as uid')->where('to', $id)->where('accepted', 1);
+        $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from', $id)->where('accepted', 1)->union($frnd);
+        $users = DB::table('users')->joinSub($all_frnd, 'frnds', function ($join) {
+            $join->on('frnds.uid', '=', 'users.uid');
+        })->get();
+
+
+        return view('friends_acc', compact('user', 'code', 'users'));
     }
 
     function fetch(Request $request)
@@ -282,10 +336,10 @@ class HomeController extends Controller
         request()->validate([
             'coverimg' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-       
+
         $imageName = 'cover.' . request()->coverimg->getClientOriginalExtension();
         request()->coverimg->move(public_path('img/' . str_replace(' ', '_', strtolower(Auth::user()->name))), $imageName);
-        DB::table('users')->where('uid',Auth::id())->update(['cover_pic' => $imageName]);
+        DB::table('users')->where('uid', Auth::id())->update(['cover_pic' => $imageName]);
         return back()->with('success', 'You have successfully update your cover pic.');
     }
 
@@ -294,10 +348,10 @@ class HomeController extends Controller
         request()->validate([
             'proimg' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-       
+
         $imageName = 'pro.' . request()->proimg->getClientOriginalExtension();
         request()->proimg->move(public_path('img/' . str_replace(' ', '_', strtolower(Auth::user()->name))), $imageName);
-        DB::table('users')->where('uid',Auth::id())->update(['pro_pic' => $imageName]);
+        DB::table('users')->where('uid', Auth::id())->update(['pro_pic' => $imageName]);
         return back()->with('success', 'You have successfully update your Profile pic.');
     }
 
@@ -330,18 +384,17 @@ class HomeController extends Controller
     {
         $from = $request->from;
         $comment = $request->comment;
-        $pid = explode("_",$request->pid)[1];
-        $to = DB::table('posts')->where('pid',$pid)->first();
+        $pid = explode("_", $request->pid)[1];
+        $to = DB::table('posts')->where('pid', $pid)->first();
         //return $to;
-        DB::table('comments')->insert(['comment'=>$comment,'from_uid'=>$from,'to_uid'=>$to->user_id,'post_id'=>$pid,'created_at' => Carbon::now()]);
-        $comm = DB::table('comments')->where('post_id',$pid)->join('users','users.uid','=','from_uid')->orderBy('comments.created_at','desc')->get();
-        return view('comment.index',compact('comm'));
+        DB::table('comments')->insert(['comment' => $comment, 'from_uid' => $from, 'to_uid' => $to->user_id, 'post_id' => $pid, 'created_at' => Carbon::now()]);
+        $comm = DB::table('comments')->where('post_id', $pid)->join('users', 'users.uid', '=', 'from_uid')->orderBy('comments.created_at', 'desc')->get();
+        return view('comment.index', compact('comm'));
     }
 
     public function get_comment(Request $request)
     {
-        $comm = DB::table('comments')->where('post_id',$request->pid)->join('users','users.uid','=','from_uid')->orderBy('comments.created_at','desc')->get();
-        return view('comment.index',compact('comm'));
-
+        $comm = DB::table('comments')->where('post_id', $request->pid)->join('users', 'users.uid', '=', 'from_uid')->orderBy('comments.created_at', 'desc')->get();
+        return view('comment.index', compact('comm'));
     }
 }

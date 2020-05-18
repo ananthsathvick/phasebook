@@ -57,15 +57,9 @@
                     <div class="row mt-2">
                         <div class="col">
                             <div class="grid">
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
+                            @foreach($posts as $post)
+                            <a href="#pos_{{$post->pid}}"><div><img src="{{ asset('img/'.str_replace(' ','_',strtolower($post->name)).'/'.$post->post_image) }}" class="" alt="Cover pic" style="object-fit:contain"></div></a>
+                            @endforeach
                             </div>
                         </div>
                     </div>
@@ -78,75 +72,21 @@
                         <div class="col-auto">
                             <i class="fas fa-user-friends" style="color: #f60c6b"></i>
                             <h6 class="d-inline"> Friends</h6>
-                            <div class="d-inline text-muted"> · 420</div>
+                            <div class="d-inline text-muted">{{count($users_frnd)}}</div>
                         </div>
                     </div>
                     <div class="row mt-2">
                         <div class="col">
                             <ul class="image-list-small m-0">
+                                @foreach($users_frnd as $u)
                                 <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/bahnhoff.jpg');"></a>
+                                    <a href="/account/{{$u->uid}}" style="background-image: url(@if($u->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($u->name)).'/'.$u->pro_pic)}} @endif)"></a>
                                     <div class="details">
-                                        <h3><a href="#">In the subway</a></h3>
+                                        <h3><a href="/account/{{$u->uid}}">{{$u->name}}</a></h3>
 
                                     </div>
                                 </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/industrial-mech.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Industrial</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/colosseum.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">When in Rome..</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/sahale-wa.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Mountain Top</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/tonemapped.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Vienna Adventure</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/sands-of-life.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Magnificent beach</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/sands-of-life.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Magnificent beach</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/sands-of-life.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Magnificent beach</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/sands-of-life.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Magnificent beach</a></h3>
-
-                                    </div>
-                                </li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
@@ -209,7 +149,7 @@
             <div class="text-muted text-center mt-3">No posts yet</div>
             @endif
             @foreach($posts as $post)
-            <div class="card my-3">
+            <div class="card my-3" id="pos_{{$post->pid}}">
                 <div class="card-body pb-0">
                     <!-- <div class="card-title"> -->
                     <div class="row mb-1">

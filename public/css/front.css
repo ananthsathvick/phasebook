@@ -185,12 +185,11 @@ body {
     grid-template-columns: repeat(3, 1fr);
 }
 
-.grid>div {
+.grid>a>div {
     padding: 10px;
     /* background-color: #ccc; */
     height: 101px;
     width: 101px;
-    width: 100%;
     justify-content: center;
     display: flex;
     flex-direction: row;
@@ -221,7 +220,7 @@ body {
 .image-list-small li>a {
     display: block;
     text-decoration: none;
-    background-size: cover;
+    background-size: contain;
     background-repeat: no-repeat;
     height: 101px;
     margin: 0;

@@ -1,66 +1,6 @@
-@extends('layouts.all_pages')
+@extends('acc_layout')
 
-@section('content')
-<div class="container">
-    <div class="row">
-        <div class="col-11">
-            <div id="cover-pic-div">
-                <h4 id="pro-name">{{$user->name}}</h4>
-                <img id="cover-pic" src="@if($user->cover_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($user->name)).'/'.$user->cover_pic)}} @endif" class="" alt="Cover pic">
-                <div id="pro-pic-div">
-                    <img src="@if($user->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($user->name)).'/'.$user->pro_pic)}} @endif" alt="..." class="rounded-circle bottom-left">
-                    
-                </div>
-                <div class="bottom-right d-inline">
-                    <button type="button" class="btn btn-secondary btn-sm" id="send_frnd_req">
-                        @if($code == 3)
-                        <i class="fas fa-user-plus"></i> Add Friend
-                        @elseif($code == 1)
-                        <i class="fas fa-user-plus"></i> Accept Friend Request
-                        @elseif($code == 0)
-                        <i class="fas fa-user-plus"></i> Friend Request Sent
-                        @else
-                        <i class="fas fa-check"></i> Friends
-                        @endif
-                    </button>
-
-                    <button type="button" @if($code !=2) style="display: none;" @endif class="btn btn-secondary btn-sm" id="msg_btn"><i class="fab fa-facebook-messenger"></i> Message</button>
-
-
-                </div>
-            </div>
-            <div class="card text-center border-top-0 border-fb-col">
-                <div class="card-body p-0">
-
-                    <div class="row justify-content-center">
-
-                        <div class="col-auto  border-right border-left border-fb-col  py-2 px-3">
-                            <div class="mx-4">
-                                Timeline
-                            </div>
-                        </div>
-                        <div class="col-auto border-right  border-fb-col p-2">
-                            <div class="mx-4">
-                                About
-                            </div>
-                        </div>
-                        <div class="col-auto  border-right  border-fb-col p-2">
-                            <div class="mx-4">
-                                Friends
-                            </div>
-                        </div>
-                        <div class="col-auto  border-right  border-fb-col p-2">
-                            <div class="mx-4">
-                                Photos
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+@section('acc_con')
 <div class="container mt-3">
     <div class="row">
         <div class="col-5">
@@ -74,35 +14,34 @@
                     </div>
                     <div class="row justify-content-center my-2">
                         <div class="col-auto text-center">
-                            <div> Get vector icons and social logos on your website with Font Awesome, the web's most popular icon set and toolkit. </div>
+                            <div> {{$user->bio}} </div>
                         </div>
                     </div>
                     <div class="dropdown-divider"></div>
                     <div class="row mb-3">
                         <div class="col-auto">
                             <i class="fas fa-briefcase"></i>
-                            <div class="d-inline"> Work Place</div>
+                            <div class="d-inline">{{$user->work}}</div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-auto">
                             <i class="fas fa-graduation-cap"></i>
-                            <div class="d-inline"> Study</div>
+                            <div class="d-inline"> {{$user->study}}</div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-auto">
                             <i class="fas fa-calendar-alt"></i>
-                            <div class="d-inline"> Date of Birth</div>
+                            <div class="d-inline">{{$user->dob}}</div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-auto">
                             <i class="fas fa-venus-mars"></i>
-                            <div class="d-inline"> Gender</div>
+                            <div class="d-inline"> {{$user->gender}}</div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-secondary btn-sm btn-block">Edit Details</button>
                 </div>
             </div>
 
@@ -117,15 +56,11 @@
                     <div class="row mt-2">
                         <div class="col">
                             <div class="grid">
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
-                                <div><img id="cover-pic" src="{{ asset('img/main.png') }}" class="" alt="Cover pic"></div>
+                                @foreach($posts as $post)
+                                <a href="#pos_{{$post->pid}}">
+                                    <div><img src="{{ asset('img/'.str_replace(' ','_',strtolower($post->name)).'/'.$post->post_image) }}" class="" alt="Cover pic" style="object-fit:contain"></div>
+                                </a>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -138,75 +73,21 @@
                         <div class="col-auto">
                             <i class="fas fa-user-friends" style="color: #f60c6b"></i>
                             <h6 class="d-inline"> Friends</h6>
-                            <div class="d-inline text-muted"> · 420</div>
+                            <div class="d-inline text-muted">{{count($users_frnd)}}</div>
                         </div>
                     </div>
                     <div class="row mt-2">
                         <div class="col">
                             <ul class="image-list-small m-0">
+                                @foreach($users_frnd as $u)
                                 <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/bahnhoff.jpg');"></a>
+                                    <a href="/account/{{$u->uid}}" style="background-image: url(@if($u->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower($u->name)).'/'.$u->pro_pic)}} @endif)"></a>
                                     <div class="details">
-                                        <h3><a href="#">In the subway</a></h3>
+                                        <h3><a href="/account/{{$u->uid}}">{{$u->name}}</a></h3>
 
                                     </div>
                                 </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/industrial-mech.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Industrial</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/colosseum.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">When in Rome..</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/sahale-wa.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Mountain Top</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/tonemapped.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Vienna Adventure</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/sands-of-life.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Magnificent beach</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/sands-of-life.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Magnificent beach</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/sands-of-life.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Magnificent beach</a></h3>
-
-                                    </div>
-                                </li>
-                                <li>
-                                    <a href="#" style="background-image: url('assets/images/pictures/sands-of-life.jpg');"></a>
-                                    <div class="details">
-                                        <h3><a href="#">Magnificent beach</a></h3>
-
-                                    </div>
-                                </li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
@@ -237,7 +118,7 @@
             <div class="text-muted text-center mt-3">No posts yet</div>
             @endif
             @foreach($posts as $post)
-            <div class="card my-3">
+            <div class="card my-3" id="pos_{{$post->pid}}">
                 <div class="card-body pb-0">
                     <!-- <div class="card-title"> -->
                     <div class="row mb-1">
@@ -299,107 +180,4 @@
         </div>
     </div>
 </div>
-<script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-    $('.like,.dis-like').click(function() {
-        var pid = $(this).attr('val');
-        //console.log($id);
-        $pos = $(this);
-        $chld = $(this).children("i");
-        if ($pos.hasClass('like')) {
-            $.ajax({
-                type: 'POST',
-                url: '/like',
-                data: {
-                    from: '{{ Auth::id() }}',
-                    pid: pid
-                },
-                success: function(data) {
-                    console.log(data);
-                    $chld.removeClass();
-                    $chld.addClass('fas fa-thumbs-up');
-                    $pos.css('color', 'dodgerblue');
-                    // $pos.removeClass('like');
-                    // $pos.attr("class", "dis-like");
-                    $pos.toggleClass('like dis-like');
-                    $('#' + pid).html(parseInt($('#' + pid).html(), 10) + 1)
-
-                }
-            });
-
-        } else {
-            $.ajax({
-                type: 'POST',
-                url: '/dis_like',
-                data: {
-                    from: '{{ Auth::id() }}',
-                    pid: pid
-                },
-                success: function(data) {
-                    console.log(data);
-                    $chld.removeClass();
-                    $chld.addClass('far fa-thumbs-up');
-                    $pos.css('color', 'black');
-
-                    // $pos.removeClass('dis-like');
-                    // $pos.attr("class", "like");
-                    $pos.toggleClass('like dis-like');
-                    $('#' + pid).html(parseInt($('#' + pid).html(), 10) - 1);
-                }
-            });
-
-        }
-
-    });
-
-    $('#send_frnd_req').click(function() {
-        @if($code == 3)
-
-        $.ajax({
-            type: 'POST',
-            url: '/send_freq',
-            data: {
-                from: '{{ Auth::id() }}',
-                to: '{{$user->uid}}'
-            },
-            success: function(data) {
-                //$("#msg").html(data.msg);
-                console.log(data);
-                if (JSON.parse(data) == "success") {
-
-                    $('#send_frnd_req').html('<i class="fas fa-user-plus"></i> Friend Request Sent');
-
-                    //console.log($(this));
-                }
-            }
-        });
-        @elseif($code == 1)
-        $.ajax({
-            type: 'POST',
-            url: '/accept_freq',
-            data: {
-                to: '{{ Auth::id() }}',
-                from: '{{$user->uid}}'
-            },
-            success: function(data) {
-                //$("#msg").html(data.msg);
-                console.log(data);
-                if (JSON.parse(data) == "success") {
-
-                    $('#send_frnd_req').html('<i class="fas fa-check"></i> Friends');
-                    $('#msg_btn').show();
-
-                    //console.log($(this));
-                }
-            }
-        });
-
-        @endif
-
-    });
-</script>
 @endsection

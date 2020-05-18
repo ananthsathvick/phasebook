@@ -7,7 +7,7 @@
             <div id="cover-pic-div">
                 <img id="cover-pic" src="@if($user->cover_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.$user->cover_pic)}} @endif" class="" alt="Cover pic">
                 <div id="pro-pic-div">
-                    <img src="@if($user->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.$user->pro_pic)}} @endif" alt="..." class="rounded-circle bottom-left" >
+                    <img src="@if($user->pro_pic  == NULL){{ asset('img/main.png') }}@else {{asset('img/'. str_replace(' ', '_', strtolower(Auth::user()->name)).'/'.$user->pro_pic)}} @endif" alt="..." class="rounded-circle bottom-left">
                     <form action="{{ route('upload-pro') }}" method="POST" enctype="multipart/form-data" id="pro_form">
                         @csrf
                         <input type="file" id="inp_pro" name="proimg" onchange="$('#pro_form').submit()" hidden />
@@ -26,32 +26,34 @@
 
                     <div class="row justify-content-center">
                         <a class="text-decoration-none" href='/profile'>
-                        <div class="col-auto  border-right border-left border-fb-col  py-2 px-3">
-                            <div class="mx-4">
-                                Timeline
-                            </div>
+                            <div class="col-auto  border-right border-left border-fb-col  py-2 px-3">
+                                <div class="mx-4">
+                                    Timeline
+                                </div>
                         </a>
-                        </div>
-                        <!-- <div class="col-auto border-right  border-fb-col p-2">
+                    </div>
+                    <!-- <div class="col-auto border-right  border-fb-col p-2">
                             <div class="mx-4">
                                 About
                             </div>
                         </div> -->
+                    <a class="text-decoration-none" href='/friends'>
                         <div class="col-auto  border-right  border-fb-col p-2">
                             <div class="mx-4">
                                 Friends
                             </div>
                         </div>
-                        <div class="col-auto  border-right  border-fb-col p-2">
-                            <div class="mx-4">
-                                Photos
-                            </div>
+                    </a>
+                    <div class="col-auto  border-right  border-fb-col p-2">
+                        <div class="mx-4">
+                            Photos
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 @yield('con')
 @endsection
