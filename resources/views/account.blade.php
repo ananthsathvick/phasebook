@@ -154,7 +154,24 @@
                     <p>{{$post->post_caption}}</p>
                     <img src="{{ asset('img/'.str_replace(' ','_',strtolower($post->name)).'/'.$post->post_image) }}" class="img-fluid" alt="Responsive image">
 
-                    <div><i class="far fa-thumbs-up"></i> <span id="{{$post->pid}}"> @if($post->like_count!=NULL) {{$post->like_count}}@else 0 @endif</span></div>
+                    <div type="button" class="liked_by underline" id="lkedby_{{$post->pid}}" data-toggle="modal" data-target="#like_count_{{$post->pid}}"><i class="far fa-thumbs-up"></i> <span id="{{$post->pid}}"> @if($post->like_count!=NULL) {{$post->like_count}}@else 0 @endif</span></div>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="like_count_{{$post->pid}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalCenterTitle">Liked by</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body" id="modal_body_{{$post->pid}}">
+                                    ...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="dropdown-divider"></div>
                     <div class="row">
 

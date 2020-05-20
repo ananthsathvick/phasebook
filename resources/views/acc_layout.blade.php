@@ -78,6 +78,22 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+    $('.liked_by').click(function() {
+                var iid = $(this).attr('id');
+                var pid = iid.split('_')[1];
+                console.log(pid);
+                $.ajax({
+                    type: 'POST',
+                    url: '/liked_by',
+                    data: {
+                        pid: pid
+                    },
+                    success: function(data) {
+                        console.log('#modal_body_' + pid);
+                        $('#modal_body_' + pid).html(data);
+                    }
+                });
+            });
 
     $('.getc').click(function() {
         var iid = $(this).attr('id');

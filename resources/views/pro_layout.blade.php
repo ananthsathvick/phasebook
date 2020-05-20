@@ -34,7 +34,7 @@
 
                     <div class="row justify-content-center">
                         <a class="text-decoration-none" href='/profile'>
-                            <div class="col-auto  border-right border-left border-fb-col  py-2 px-3">
+                            <div class="col-auto  border-right border-left border-fb-col  py-2 px-3 text-decoration-none">
                                 <div class="mx-4">
                                     Timeline
                                 </div>
@@ -45,7 +45,7 @@
                                 About
                             </div>
                         </div> -->
-                    <a class="text-decoration-none" href='/friends'>
+                    <a href='/friends' class="text-decoration-none">
                         <div class="col-auto  border-right  border-fb-col p-2">
                             <div class="mx-4">
                                 Friends

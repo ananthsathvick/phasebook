@@ -368,7 +368,7 @@ class HomeController extends Controller
         $from = $request->from;
         $pid = $request->pid;
         $post = DB::table('posts')->where('pid', $pid)->first();
-        DB::table('reactions')->insert(['from_uid' => $from, 'to_uid' => $post->user_id, 'post_id' => $post->pid]);
+        DB::table('reactions')->insert(['from_uid' => $from, 'to_uid' => $post->user_id, 'post_id' => $post->pid,'created_at' => Carbon::now()]);
         echo json_encode("success");
     }
 
@@ -396,5 +396,12 @@ class HomeController extends Controller
     {
         $comm = DB::table('comments')->where('post_id', $request->pid)->join('users', 'users.uid', '=', 'from_uid')->orderBy('comments.created_at', 'desc')->get();
         return view('comment.index', compact('comm'));
+    }
+
+    
+    public function liked_by(Request $request)
+    {
+        $lik = DB::table('reactions')->where('post_id', $request->pid)->join('users', 'users.uid', '=', 'from_uid')->orderBy('reactions.created_at', 'desc')->get();
+        return view('liked_by.index', compact('lik'));
     }
 }
