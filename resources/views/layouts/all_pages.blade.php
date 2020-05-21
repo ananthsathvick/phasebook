@@ -97,7 +97,7 @@
                         <li class="nav-item">
                             <div class="dropdown">
                                 <a class="nav-link btn dropdown-toggle" id="get_frq" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#"><i class="fas fa-user-friends"></i><sup class="border-0 rounded-circle bg-danger" style="padding: 0px 2px;" id="pend_freq"></sup></a>
-                                <div class="dropdown-menu" aria-labelledby="get_frq" id="friend">
+                                <div class="dropdown-menu dropdown-menu-right scrollable-menu" aria-labelledby="get_frq" id="friend" style="width:30em;">
 
                                 </div>
 
@@ -109,7 +109,14 @@
                         </li>
 
                         <li class="nav-item" style="border-right: solid;border-right-width: medium;border-radius: 20px;">
-                            <a class="nav-link" href="#"><i class="fas fa-bell"></i></a>
+                            <div class="dropdown" id="noti_dw">
+                                <a class="nav-link btn dropdown-toggle" id="get_notify" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#"><i class="fas fa-bell"></i><sup class="border-0 rounded-circle bg-danger" style="padding: 0px 2px;" id="pend_notify"></sup></a>
+                                <div class="dropdown-menu dropdown-menu-right scrollable-menu" aria-labelledby="get_notify" id="notify" style="width:24em">
+
+
+                                </div>
+
+                            </div>
                         </li>
 
                         <li class="nav-item dropdown">
@@ -153,10 +160,16 @@
                     id: "{{Auth::id()}}"
                 },
                 success: function(data) {
-                    $('#pend_freq').html(data);
-                    if (data == 0) {
+                    //console.log(data);
+                    $('#pend_freq').html(data[0]);
+                    if (data[0] == 0) {
                         $('#pend_freq').hide();
                     }
+                    $('#pend_notify').html(data[1]);
+                    if (data[1] == 0) {
+                        $('#pend_notify').hide();
+                    }
+
                 }
             });
 
@@ -320,6 +333,20 @@
             });
         });
 
+        $('#get_notify').click(function() {
+            $.ajax({
+                type: "post",
+                url: "/get_notify", // need to create this route
+                data: {
+                    id: "{{Auth::id()}}"
+                },
+                success: function(data) {
+                    $('#notify').html(data);
+                    $('#pend_notify').hide();
+                }
+            });
+        });
+
         Pusher.logToConsole = false;
 
         var pusher_f = new Pusher('a8ceda3b313fecc81569', {
@@ -377,6 +404,76 @@
                     var pending = parseInt($('#pend_freq').html());
                     $('#pend_freq').show();
                     $('#pend_freq').html(pending + 1);
+
+                }
+            }
+        });
+
+
+
+
+
+
+
+
+
+        Pusher.logToConsole = false;
+
+        var pusher_lkd = new Pusher('a8ceda3b313fecc81569', {
+            cluster: 'ap2',
+            forceTLS: true
+        });
+
+        var channel_lkd = pusher_lkd.subscribe('notify');
+        channel_lkd.bind('noti', function(data) {
+            // alert(JSON.stringify(data));
+
+            if (my_id == data.to) {
+                if (!Notification) {
+                    alert('Desktop notifications not available in your browser. Try Chromium.');
+                    //  console.log("2");
+                    return;
+                }
+
+                if (Notification.permission !== "granted") {
+                    Notification.requestPermission().then(function(permission) {
+                        // If the user accepts, let's create a notification
+                        if (permission === "granted") {
+                            var notification = new Notification(data.from + ((data.like == 0) ? " Commented on your post" : " Liked your post"), {
+                                icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
+                                body: data.note,
+                            });
+
+                            notification.onclick = function() {
+                                //            console.log("5");
+                                window.open("http://localhost/profile#pos_" + data.pid);
+                            };
+                        }
+                    });
+                    //  console.log("3");
+                } else {
+                    //  console.log("4");
+                    var notification = new Notification(data.from + ((data.like == 0) ? " Commented on your post" : " Liked your post"), {
+                        icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
+                        body: data.note,
+                    });
+
+                    notification.onclick = function() {
+                        //        console.log("5");
+                        window.open("http://localhost/profile#pos_" + data.pid);
+                    };
+                    //   console.log("6");
+                }
+                if ($('#notify').hasClass('show')) {
+                    // if receiver is selected, reload the selected user ...
+                    $('#get_notify').click();
+                    $('#get_notify').click();
+                } else {
+
+                    // if receiver is not seleted, add notification for that user
+                    var pending = parseInt($('#pend_notify').html());
+                    $('#pend_notify').show();
+                    $('#pend_notify').html(pending + 1);
 
                 }
             }

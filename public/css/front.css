@@ -81,6 +81,12 @@ body {
     padding-right: 0; */
 }
 
+.scrollable-menu {
+    height: auto;
+    max-height: 500px;
+    overflow-x: hidden;
+}
+
 .pad-lef-0 {
     padding-left: 0;
 }

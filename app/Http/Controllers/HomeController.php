@@ -38,7 +38,7 @@ class HomeController extends Controller
         $posts = DB::table('posts')->distinct()
             // ->where('user_id', Auth::id())
 
-            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic','gender')
+            ->select('name', 'users.uid', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic', 'gender')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -63,7 +63,7 @@ class HomeController extends Controller
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
         $posts = DB::table('posts')
             ->where('user_id', Auth::id())
-            ->select('uid','name','gender', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
+            ->select('uid', 'name', 'gender', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -136,7 +136,7 @@ class HomeController extends Controller
         $rec = DB::table('reactions')->selectRaw('count(*) as like_count, post_id')->groupBy('post_id');
         $posts = DB::table('posts')
             ->where('user_id', $id)
-            ->select('name', 'users.uid','gender', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
+            ->select('name', 'users.uid', 'gender', 'posts.created_at', 'post_image', 'post_caption', 'posts.pid', 'like_count', 'fd', 'pro_pic')
             //->select('*')
             //->selectRaw('name,posts.created_at,post_image,post_caption,posts.pid,like_count,exists(fd)')
             ->leftJoinSub($rec, 'rec', function ($join) {
@@ -154,7 +154,7 @@ class HomeController extends Controller
             $join->on('frnds.uid', '=', 'users.uid');
         })->get();
 
-        return view('account', compact('user', 'code', 'posts','users_frnd'));
+        return view('account', compact('user', 'code', 'posts', 'users_frnd'));
     }
 
     public function account_friends($id)
@@ -247,16 +247,37 @@ class HomeController extends Controller
         }
     }
 
+    function delete_freq(Request $request)
+    {
+        $suc = DB::table('friend_reqs')->where([['to', $request->to], ['from', $request->from]])->delete();
+        if ($suc) {
+            echo json_encode("success");
+        } else {
+            echo json_encode("failed");
+        }
+    }
+
     function get_frq(Request $request)
     {
         $suc = DB::table('friend_reqs')->where('to', $request->id)->where('accepted', 0)->join('users', 'users.uid', '=', 'from')->orderBy('friend_reqs.created_at', 'desc')->get();
         return view('friend_req.index', ['users' => $suc]);
     }
 
+    function get_notify(Request $request)
+    {
+        $suc = DB::table('notification')->where('to_uid', $request->id)->join('users', 'users.uid', '=', 'from_uid')->join('posts', 'posts.pid', '=', 'post_id')->orderBy('notification.created_at', 'desc')->get();
+        DB::table('notification')->where('to_uid', $request->id)->update(['is_read'=>'1']);
+        return view('layouts.notify.index', ['users' => $suc]);
+    }
+
     function get_frq_pen(Request $request)
     {
-        $suc = DB::table('friend_reqs')->where('to', $request->id)->where('accepted', 0)->join('users', 'users.uid', '=', 'from')->get();
-        return count($suc);
+        $suc = array();
+        $frnd = DB::table('friend_reqs')->where('to', $request->id)->where('accepted', 0)->join('users', 'users.uid', '=', 'from')->get();
+        $noti = DB::table('notification')->where('to_uid', $request->id)->where('is_read', 0)->get();
+        $suc[0] = count($frnd);
+        $suc[1] = count($noti);
+        return $suc;
     }
 
     public function messanger()
@@ -368,7 +389,25 @@ class HomeController extends Controller
         $from = $request->from;
         $pid = $request->pid;
         $post = DB::table('posts')->where('pid', $pid)->first();
-        DB::table('reactions')->insert(['from_uid' => $from, 'to_uid' => $post->user_id, 'post_id' => $post->pid,'created_at' => Carbon::now()]);
+        DB::table('reactions')->insert(['from_uid' => $from, 'to_uid' => $post->user_id, 'post_id' => $post->pid, 'created_at' => Carbon::now()]);
+        $user = DB::table('users')->where('uid', $from)->first();
+        $notice = $user->name . " liked your post";
+        if ($from != $post->user_id) {
+            DB::table('notification')->insert(['from_uid' => $from, 'to_uid' => $post->user_id, 'post_id' => $post->pid, 'notice' => $notice, 'created_at' => Carbon::now()]);
+            $options = array(
+                'cluster' => 'ap2',
+                'useTLS' => true
+            );
+
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                $options
+            );
+            $data = ['from' => $user->name, 'to' => $post->user_id,'note' => "Doesn't mean they like you",'pid'=>$pid,'like'=>'1'];
+            $pusher->trigger('notify', 'noti', $data);
+        }
         echo json_encode("success");
     }
 
@@ -388,6 +427,25 @@ class HomeController extends Controller
         $to = DB::table('posts')->where('pid', $pid)->first();
         //return $to;
         DB::table('comments')->insert(['comment' => $comment, 'from_uid' => $from, 'to_uid' => $to->user_id, 'post_id' => $pid, 'created_at' => Carbon::now()]);
+        $user = DB::table('users')->where('uid', $from)->first();
+        $notice = $user->name . " commented your post <br/>" . $comment;
+        if ($from != $to->user_id)
+        {
+            DB::table('notification')->insert(['from_uid' => $from, 'to_uid' => $to->user_id, 'post_id' => $pid, 'notice' => $notice, 'created_at' => Carbon::now()]);
+            $options = array(
+                'cluster' => 'ap2',
+                'useTLS' => true
+            );
+
+            $pusher = new Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                $options
+            );
+            $data = ['from' => $user->name, 'to' => $to->user_id,'note' => $comment,'pid'=>$pid,'like'=>'0'];
+            $pusher->trigger('notify', 'noti', $data);
+        }
         $comm = DB::table('comments')->where('post_id', $pid)->join('users', 'users.uid', '=', 'from_uid')->orderBy('comments.created_at', 'desc')->get();
         return view('comment.index', compact('comm'));
     }
@@ -398,7 +456,7 @@ class HomeController extends Controller
         return view('comment.index', compact('comm'));
     }
 
-    
+
     public function liked_by(Request $request)
     {
         $lik = DB::table('reactions')->where('post_id', $request->pid)->join('users', 'users.uid', '=', 'from_uid')->orderBy('reactions.created_at', 'desc')->get();

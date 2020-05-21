@@ -43,8 +43,12 @@ Route::get('/account/{id}','HomeController@account');
 Route::get('/account/{id}/friends','HomeController@account_friends');
 
 Route::post('/send_freq','HomeController@send_freq')->name('friend_request');
-Route::post('/accept_freq','HomeController@accept_freq')->name('accept_frequest');
+Route::post('/accept_freq','HomeController@accept_freq')->name('accept_freq');
+Route::post('/delete_freq','HomeController@delete_freq')->name('delete_freq');
 Route::post('/get_frq','HomeController@get_frq')->name('get_frq');
+
+Route::post('/get_notify','HomeController@get_notify')->name('get_frq');
+
 Route::post('/get_frq_pen','HomeController@get_frq_pen')->name('get_frq_pen');
 
 Route::get('/messenger', 'HomeController@messanger')->name('messanger');
