@@ -276,8 +276,10 @@ class HomeController extends Controller
         $suc = array();
         $frnd = DB::table('friend_reqs')->where('to', $request->id)->where('accepted', 0)->join('users', 'users.uid', '=', 'from')->get();
         $noti = DB::table('notification')->where('to_uid', $request->id)->where('is_read', 0)->get();
+        $msg = DB::table('messages')->where('to', $request->id)->where('is_read', 0)->get();
         $suc[0] = count($frnd);
         $suc[1] = count($noti);
+        $suc[2] = count($msg);
         return $suc;
     }
 
@@ -290,7 +292,7 @@ class HomeController extends Controller
         $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from', $id)->where('accepted', 1)->union($frnd);
         // count how many message are unread from the selected user
         // $users = DB::select("select users.uid, users.name, users.pro_pic , users.email, users.gender,count(is_read) as unread 
-        // from users LEFT  JOIN  messages ON users.uid = messages.from and is_read = 0 and messages.to = " . Auth::id() . "
+        // from users LEFT  JOIN  messages ON users.uid = messages.from and is_read = 0 and messages.to = " . Auth::id() . " 
         // where users.uid != " . Auth::id() . " 
         // group by users.uid, users.name, users.pro_pic, users.email,users.gender");
         
@@ -300,13 +302,13 @@ class HomeController extends Controller
         })
         ->leftJoin('messages', function ($join) {
             $join->on('users.uid', '=', 'messages.from')
-            ->where('is_read','=',0)
-            ->where('messages.to','=', Auth::id())
-            ->where('users.uid','=',Auth::id());
+            ->where('is_read','=','0')
+            ->where('messages.to','=', Auth::id());
+            //->where('users.uid','=',Auth::id());
         })
-        ->groupBy('users.uid', 'users.name', 'users.pro_pic', 'users.email','users.gender')
+        ->groupBy( 'users.uid','users.name', 'users.pro_pic', 'users.email','users.gender')
         ->get();
-      
+        //return $users;
         return view('messanger', ['users' => $users]);
     }
 

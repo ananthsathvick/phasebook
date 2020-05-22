@@ -105,7 +105,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" href="#"><i class="fab fa-facebook-messenger"></i></a>
+                            <a class="nav-link" href="/messenger"><i class="fab fa-facebook-messenger"></i><sup class="border-0 rounded-circle bg-danger" style="padding: 0px 2px;" id="pend_msg"></sup></a>
                         </li>
 
                         <li class="nav-item" style="border-right: solid;border-right-width: medium;border-radius: 20px;">
@@ -168,6 +168,10 @@
                     $('#pend_notify').html(data[1]);
                     if (data[1] == 0) {
                         $('#pend_notify').hide();
+                    }
+                    $('#pend_msg').html(data[2]);
+                    if (data[2] == 0) {
+                        $('#pend_msg').hide();
                     }
 
                 }
@@ -261,6 +265,15 @@
                         } else {
                             $('#' + data.from).append('<span class="pending">1</span>');
                         }
+                        
+                        var tot = $('#pend_msg').html();
+                        if (tot == 0) {
+                            $('#pend_msg').show();
+                        }
+                        tot = parseInt(tot) + 1;
+                        $('#pend_msg').html(tot);
+
+                        
                     }
                 }
             });
