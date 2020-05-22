@@ -289,23 +289,23 @@ class HomeController extends Controller
         $frnd = DB::table('friend_reqs')->select('from as uid')->where('to', $id)->where('accepted', 1);
         $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from', $id)->where('accepted', 1)->union($frnd);
         // count how many message are unread from the selected user
-        $users = DB::select("select users.uid, users.name, users.pro_pic , users.email, users.gender,count(is_read) as unread 
-        from users LEFT  JOIN  messages ON users.uid = messages.from and is_read = 0 and messages.to = " . Auth::id() . "
-        where users.uid != " . Auth::id() . " 
-        group by users.uid, users.name, users.pro_pic, users.email");
+        // $users = DB::select("select users.uid, users.name, users.pro_pic , users.email, users.gender,count(is_read) as unread 
+        // from users LEFT  JOIN  messages ON users.uid = messages.from and is_read = 0 and messages.to = " . Auth::id() . "
+        // where users.uid != " . Auth::id() . " 
+        // group by users.uid, users.name, users.pro_pic, users.email,users.gender");
         
-        // $users = DB::table('users')->selectRaw('users.uid ,users.name, users.pro_pic , users.email, count(is_read) as unread')
-        // ->joinSub($all_frnd, 'frnds', function ($join) {
-        //     $join->on('frnds.uid', '=', 'users.uid');
-        // })
-        // ->leftJoin('messages', function ($join) {
-        //     $join->on('users.uid', '=', 'messages.from')
-        //     ->on('is_read','=','0')
-        //     ->on('messages.to','=', Auth::id())
-        //     ->where('users.uid','=',Auth::id());
-        // })
-        // ->groupBy('users.uid', 'users.name', 'users.pro_pic', 'users.email')
-        // ->get();
+        $users = DB::table('users')->selectRaw('users.uid ,users.name, users.pro_pic , users.email, count(is_read) as unread,users.gender')
+        ->joinSub($all_frnd, 'frnds', function ($join) {
+            $join->on('frnds.uid', '=', 'users.uid');
+        })
+        ->leftJoin('messages', function ($join) {
+            $join->on('users.uid', '=', 'messages.from')
+            ->where('is_read','=',0)
+            ->where('messages.to','=', Auth::id())
+            ->where('users.uid','=',Auth::id());
+        })
+        ->groupBy('users.uid', 'users.name', 'users.pro_pic', 'users.email','users.gender')
+        ->get();
       
         return view('messanger', ['users' => $users]);
     }
