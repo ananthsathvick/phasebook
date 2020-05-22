@@ -155,6 +155,7 @@ class HomeController extends Controller
         })->get();
 
         return view('account', compact('user', 'code', 'posts', 'users_frnd'));
+       //print_r($user);
     }
 
     public function account_friends($id)
@@ -284,13 +285,28 @@ class HomeController extends Controller
     {
         // select all users except logged in user
         // $users = User::where('id', '!=', Auth::id())->get();
-
+        $id = Auth::id();
+        $frnd = DB::table('friend_reqs')->select('from as uid')->where('to', $id)->where('accepted', 1);
+        $all_frnd = DB::table('friend_reqs')->select('to as uid')->where('from', $id)->where('accepted', 1)->union($frnd);
         // count how many message are unread from the selected user
-        $users = DB::select("select users.uid, users.name, users.pro_pic , users.email, count(is_read) as unread 
+        $users = DB::select("select users.uid, users.name, users.pro_pic , users.email, users.gender,count(is_read) as unread 
         from users LEFT  JOIN  messages ON users.uid = messages.from and is_read = 0 and messages.to = " . Auth::id() . "
         where users.uid != " . Auth::id() . " 
         group by users.uid, users.name, users.pro_pic, users.email");
-
+        
+        // $users = DB::table('users')->selectRaw('users.uid ,users.name, users.pro_pic , users.email, count(is_read) as unread')
+        // ->joinSub($all_frnd, 'frnds', function ($join) {
+        //     $join->on('frnds.uid', '=', 'users.uid');
+        // })
+        // ->leftJoin('messages', function ($join) {
+        //     $join->on('users.uid', '=', 'messages.from')
+        //     ->on('is_read','=','0')
+        //     ->on('messages.to','=', Auth::id())
+        //     ->where('users.uid','=',Auth::id());
+        // })
+        // ->groupBy('users.uid', 'users.name', 'users.pro_pic', 'users.email')
+        // ->get();
+      
         return view('messanger', ['users' => $users]);
     }
 

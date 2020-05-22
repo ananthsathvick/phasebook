@@ -16,7 +16,15 @@
 
                         <div class="media">
                             <div class="media-left">
-                                <img src="{{ asset('img/main.png') }}" alt="" class="media-object">
+                                <img src="@if($user->pro_pic  == NULL)
+                                @if($user->gender == 'Male')
+                                {{ asset('img/male_default.png') }}
+                                @else
+                                {{ asset('img/female_default.jpg') }}
+                                @endif
+                              @else 
+                              {{asset('img/'. str_replace(' ', '_', strtolower($user->name)).'/'.$user->pro_pic)}} 
+                            @endif" alt="" class="media-object">
                             </div>
 
                             <div class="media-body">

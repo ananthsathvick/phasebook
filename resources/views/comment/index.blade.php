@@ -19,7 +19,7 @@
         </div>
         <div class="col-sm-auto border px-4 mb-2" style="border-radius:1.25rem;background-color:#eaebee;width: 16em;word-wrap: break-word;">
             <div class="row">
-                <a href="/account/1">{{$com->name}}</a>
+                <a href="/account/{{$com->uid}}">{{$com->name}}</a>
             </div>
             <div class="row">
                 <div>{{$com->comment}}</div>
